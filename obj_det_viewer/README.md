@@ -23,7 +23,6 @@ elif platform.system() == "Linux":
     weights_file = home + "/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
 else:
     quit()
-
 ```
 
 ## Running
@@ -40,6 +39,8 @@ The code will ask you to select a file.  For the network and weights file naviga
 ../obj_det_lib/images
 ```
 
-and select one of the images.  You should see the following output.
+and select one of the images.  The output should look similar to the following:
 
 ![Example Viewer Output](example.png)
+
+The "Select File" button will allow you to select new images to run through the detector.
