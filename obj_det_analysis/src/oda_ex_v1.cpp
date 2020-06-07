@@ -50,17 +50,7 @@
 #include <dlib/image_transforms.h>
 #include <dlib/rand.h>
 
-// new copy and set learning rate includes
-//#include "copy_dlib_net.h"
-//#include "dlib_set_learning_rates.h"
-
-
 // -------------------------------GLOBALS--------------------------------------
-// This is the number used for the pyramid down input to the net
-//extern const uint32_t pyr_down_size;
-// This is the reduction size per image in the image pyramid
-//extern const double pyr_scale;
-
 extern const uint32_t array_depth;
 
 std::string platform;
@@ -85,10 +75,7 @@ void get_platform_control(void)
 		platform = "Win";
 	}
 
-	//version = version + platform;
-	// net_sync_name = version + "_sync";
 	logfileName = logfileName + version;
-	// net_name = version +  "_final_net.dat";
 }
 
 // ----------------------------------------------------------------------------------------
@@ -130,11 +117,9 @@ int main(int argc, char** argv)
 
     std::pair<uint32_t, uint32_t> target_size(45, 100);
  
-
     //create window to display images
     dlib::image_window win;
     dlib::rgb_pixel color;
-    //dlib::matrix<dlib::rgb_pixel> tmp_img;
     dlib::matrix<dlib::rgb_pixel> rgb_img;
 
     dlib::rand rnd;
@@ -167,9 +152,6 @@ int main(int argc, char** argv)
 	// setup save variable locations
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
 	program_root = get_path(get_path(get_path(std::string(argv[0]), "\\"), "\\"), "\\") + os_file_sep;
-	//sync_save_location = program_root + "nets/";
-    //results_save_location = program_root + "results/";
-	//image_save_location = program_root + "result_images/";
 
 #else
 	if (HPC == 1)
@@ -179,25 +161,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		// Ubuntu
-        if(platform.compare(0,8,"MainGear") == 0)
-		{
-            program_root = "/home/owner/Projects/machineLearningResearch/";
-        }
-        else
-        {
-            if (platform.compare(0,7,"SL02319") == 0)
-            {
-                // fill in the location of where the root program is running
-                program_root = "/media/daleas/DATA/Ashley_ML/machineLearningResearch/";
-            }
-            else
-            {
-                // fill in the location of where the root program is running
-                program_root = "/mnt/data/machineLearningResearch/";
-            }
-
-        }
+        program_root = get_ubuntu_path();
 	}
 
 	//sync_save_location = program_root + "nets/";
@@ -208,10 +172,6 @@ int main(int argc, char** argv)
 
 	std::cout << "Reading Inputs... " << std::endl;
 	std::cout << "Platform:              " << platform << std::endl;
-    //std::cout << "GPU:                   { ";
-    //for (idx = 0; idx < gpu.size(); ++idx)
-    //    std::cout << gpu[idx] << " ";
-    //std::cout << "}" << std::endl;
 	std::cout << "program_root:          " << program_root << std::endl;
 	std::cout << "results_save_location: " << results_save_location << std::endl;
 
@@ -220,7 +180,6 @@ int main(int argc, char** argv)
 
 		get_current_time(sdate, stime);
 		logfileName = logfileName + sdate + "_" + stime + ".txt";
-        //cropper_stats_file = output_save_location + "cr_stats_" + version + "_" + sdate + "_" + stime + ".txt";
 
 		std::cout << "Log File:              " << (results_save_location + logfileName) << std::endl << std::endl;
 		DataLogStream.open((results_save_location + logfileName), ios::out | ios::app);
@@ -229,10 +188,6 @@ int main(int argc, char** argv)
 		DataLogStream << "------------------------------------------------------------------" << std::endl;
 		DataLogStream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
 		DataLogStream << "Platform: " << platform << std::endl;
-        //DataLogStream << "GPU: { ";
-        //for (idx = 0; idx < gpu.size(); ++idx)
-        //    DataLogStream << gpu[idx] << " ";
-        //DataLogStream << "}" << std::endl;
 		DataLogStream << "------------------------------------------------------------------" << std::endl;
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -285,28 +240,6 @@ int main(int argc, char** argv)
         std::cout << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
         DataLogStream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
 
-
-        // ------------------------------------------------------------------------------------
-
-        // for debugging to view the images
-        //for (idx = 0; idx < test_images.size(); ++idx)
-        //{
-
-        //    win.clear_overlay();
-        //    win.set_image(test_images[idx]);
-
-        //    for (jdx = 0; jdx < test_labels[idx].size(); ++jdx)
-        //    {
-        //        color = test_labels[idx][jdx].ignore ? dlib::rgb_pixel(0, 0, 255) : dlib::rgb_pixel(0, 255, 0);
-        //        win.add_overlay(test_labels[idx][jdx].rect, color);
-        //    }
-
-        //    win.set_title(("Training Image: " + num2str(idx+1,"%05u")));
-
-        //    std::cin.ignore();
-        //    //dlib::sleep(800);
-        //}
-
         ///////////////////////////////////////////////////////////////////////////////
         // Step 2: Setup the network
         ///////////////////////////////////////////////////////////////////////////////
@@ -323,10 +256,8 @@ int main(int argc, char** argv)
 
         // show the network to verify that it looks correct
         std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
-        //std::cout << "Net Name: " << net_name << std::endl;
         std::cout << test_net << std::endl;
 
-        //DataLogStream << "Net Name: " << net_name << std::endl;
         DataLogStream << test_net << std::endl;
         DataLogStream << "------------------------------------------------------------------" << std::endl;
 
