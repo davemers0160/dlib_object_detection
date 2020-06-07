@@ -1,5 +1,5 @@
-# Object Detector Analysis Project
-This project designed to provide analysis for object detectors build on the dlib framework.
+# Object Detector Trainer Project
+This project designed to train an object detectors build on the dlib framework.
 
 ## Dependencies
 
@@ -36,6 +36,7 @@ From the directory that contains this file, execute the following commands in a 
 ```
 mkdir build
 mkdir results
+mkdir nets
 cd build
 cmake -G "Visual Studio 15 2017 Win64" -T host=x64 ..
 cmake --build . --config Release
@@ -50,6 +51,7 @@ From the directory that contains this file, execute the following commands in a 
 ```
 mkdir build
 mkdir results
+mkdir nets
 cd build
 cmake ..
 cmake --build . --config Release -- -j4
@@ -65,13 +67,13 @@ The -- -j4 tells the make to use 4 cores to build the code.  This number can be 
 
 ## Running
 
-The code is run by supplying all of the parameters in a single file.  Using this method all of the input parametes must be supplied and they must be in the order outlined in the example file *obj_det_input.txt*
+The code is run by supplying all of the parameters in a single file.  Using this method all of the input parametes must be supplied and they must be in the order outlined in the example file *sample_input_file.txt*
 
 To use the file enter the following:
 
 ```
-Windows: oda_ex ../obj_det_input.txt
-Linux: ./oda_ex ../obj_det_input.txt
+Windows: obj_det ../sample_input_file.txt
+Linux: ./obj_det ../sample_input_file.txt
 ```
 
 It is important to note that if the output folder specified in teh input file does not exist the program will run, but there may not be any indication that the data is not being saved.
