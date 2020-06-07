@@ -71,13 +71,13 @@ void get_layer_01(struct layer_struct *data, const float** data_params);
 # modify these to point to the right locations
 if platform.system() == "Windows":
     libname = "obj_det.dll"
-    lib_location = "D:/Projects/obj_det_lib/build/Release/" + libname
-    weights_file = "D:/Projects/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
+    lib_location = "D:/Projects/dlib_object_detection/obj_det_lib/build/Release/" + libname
+    weights_file = "D:/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
 elif platform.system() == "Linux":
     libname = "libobj_det.so"
     home = os.path.expanduser('~')
-    lib_location = home + "/Projects/obj_det_lib/build/" + libname
-    weights_file = home + "/Projects/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
+    lib_location = home + "/Projects/dlib_object_detection/obj_det_lib/build/" + libname
+    weights_file = home + "/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
 else:
     quit()
 
