@@ -252,7 +252,7 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
 //----------------------------------------------------------------------------------
 void close_lib()
 {
-    net.~net();
+    //net.~net();
     class_names.clear();
     class_color.clear();
 }

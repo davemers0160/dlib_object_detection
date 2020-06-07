@@ -61,10 +61,10 @@ if(WIN32)
         set(DLIB_CONTRIB "D:/Projects/dlib-contrib")
     endif()
     include(${DLIB_ROOT}/dlib/cmake)
-    
+
 else()
     set(HOME "$ENV{HOME}" CACHE INTERNAL "Copied from environment variable")
-    
+
     if(${PLATFORM} STREQUAL "HPC")
         set(COMMON_ROOT "${HOME}/Projects/Common")
         set(DLIB_ROOT "${HOME}/dlib-19.19")
@@ -78,8 +78,8 @@ else()
         set(DLIB_ROOT "${HOME}/dlib-19.19")
         set(DLIB_CONTRIB "${HOME}/Projects/dlib-contrib")
     endif()
-    add_subdirectory(${DLIB_ROOT}/dlib dlib_build)
-    
+    #add_subdirectory(${DLIB_ROOT}/dlib dlib_build)
+
 endif()
 
 
@@ -94,8 +94,10 @@ set(project_includes "include"
     )
 
 if(BUILD_LIB AND UNIX)
-    set(SOURCES ${SOURCES} "${DLIB_ROOT}/dlib/all/source.cpp")
-    set(project_includes ${project_includes} ${DLIB_ROOT})
+    #set(SOURCES ${SOURCES} "${DLIB_ROOT}/dlib/all/source.cpp")
+    #set(project_includes ${project_includes} ${DLIB_ROOT})
+
+    find_package(dlib REQUIRED)
 endif()
 
 
@@ -111,7 +113,7 @@ if(WITH_OPENCV)
         set(project_includes ${project_includes} ${OpenCV_INCLUDE_DIRS})
     else()
         message("OpenCV not found, so we won't build the project.")
-    endif() 
+    endif()
     add_definitions(-DUSE_OPENCV)
 
 endif()
@@ -140,39 +142,39 @@ include_directories(${project_includes})
 # ----------------------------------------------------------------------------
 if(BUILD_LIB)
     message("Building Object Detection Library...")
-    
+
     add_definitions(-DBUILD_LIB)
 
     if(WIN32)
 
         add_definitions(-DOBJ_DLL_EXPORTS)
         #add_subdirectory(${DLIB_ROOT}/dlib dlib_build)
-        
+
         add_library(${LIB_NAME} SHARED ${SOURCES})
         set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
         target_link_libraries(${LIB_NAME} dlib::dlib ${OpenCV_LIBS})
-        
+
         if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
             message("MSVC Version: " ${MSVC_VERSION})
             target_compile_options(${LIB_NAME} PUBLIC "/MP" "/bigobj")
             set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${LIB_NAME})
         endif() 
-    
+
     elseif(UNIX)
-                
+
         # Change these to point to the right location for a particular machine
         #add_definitions("-fPIC")
-        
-        find_package(X11 REQUIRED)
+        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+        #find_package(X11 REQUIRED)
         add_library(${LIB_NAME} SHARED ${SOURCES})
         set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
-        target_link_libraries(${LIB_NAME} ${X11_LIBRARIES})
+        #target_link_libraries(${LIB_NAME} ${X11_LIBRARIES})
         #target_link_libraries(${LIB_NAME} dlib::dlib ${X11_LIBRARIES})
-        #target_link_libraries(${LIB_NAME} dlib::dlib)
-        
+        target_link_libraries(${LIB_NAME} dlib::dlib)
+
     elseif(APPLE)
         message(FATAL_ERROR "Apple -> Not Even!")
-        
+
     endif()
 
 else()
@@ -180,13 +182,13 @@ else()
 
     add_executable(${LIB_NAME} ${SOURCES})
     target_link_libraries(${LIB_NAME} dlib::dlib ${OpenCV_LIBS})
-    
+
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
         message("MSVC Version: " ${MSVC_VERSION})
         target_compile_options(${LIB_NAME} PUBLIC "/MP" "/bigobj")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${LIB_NAME})
-    endif() 
-    
+    endif()
+
 endif()
 
 

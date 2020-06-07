@@ -35,29 +35,31 @@ extern const uint32_t array_depth = 1;
 extern const uint32_t array_depth;
 #include "obj_det_net_v10.h"
 
-#endif()
+#endif
 
-#include "load_data.h"
-#include "load_oid_data.h"
+// OpenCV Includes
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
+//#include "load_data.h"
+//#include "load_oid_data.h"
 //#include "eval_net_performance.h"
 
 // dlib includes
-#include <dlib/dnn.h>
-#include <dlib/image_io.h>
-#include <dlib/data_io.h>
-#include <dlib/image_transforms.h>
-#include <dlib/rand.h>
+//#include <dlib/dnn.h>
+//#include <dlib/image_io.h>
+//#include <dlib/data_io.h>
+//#include <dlib/image_transforms.h>
+//#include <dlib/rand.h>
 
-#if !defined(DLIB_NO_GUI_SUPPORT)
-#include "overlay_bounding_box.h"
-#include <dlib/gui_widgets.h>
-#endif
+//#if !defined(DLIB_NO_GUI_SUPPORT)
+//#include "overlay_bounding_box.h"
+//#include <dlib/gui_widgets.h>
+//#endif
 
 // dlib-contrib includes
-#include "array_image_operations.h"
-#include "random_array_cropper.h"
-#include "copy_dlib_net.h"
-#include "dlib_set_learning_rates.h"
+//#include "array_image_operations.h"
 
 // -------------------------------GLOBALS--------------------------------------
 
@@ -65,8 +67,8 @@ extern const uint32_t array_depth;
 std::string platform;
 
 //this will store the standard RGB images and groundtruth data for the bounding box labels
-std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> test_images;
-std::vector<std::vector<dlib::mmod_rect>> test_labels;
+//std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> test_images;
+//std::vector<std::vector<dlib::mmod_rect>> test_labels;
 
 std::string version;
 std::string logfileName = "obj_det_net_log_";
@@ -122,36 +124,38 @@ int main(int argc, char** argv)
     std::vector<std::vector<std::string>> test_file;
     std::vector<std::string> te_image_files;
 
+    std::vector<std::string> test_image_names = { "mframe_05042.png", "mframe_00279.png", "mframe_00156.png", "mframe_00163.png", "mframe_00353.png"};
+    
     // this matrix will contain the results of the testing
-    dlib::matrix<double, 1, 6> test_results = dlib::zeros_matrix<double>(1, 6);
+    //dlib::matrix<double, 1, 6> test_results = dlib::zeros_matrix<double>(1, 6);
 
     std::ofstream data_log_stream;
 
     std::vector<int32_t> gpu = { 0 };
 
-    dlib::rgb_pixel color;
-    dlib::matrix<dlib::rgb_pixel> rgb_img;
+    //dlib::rgb_pixel color;
+    //dlib::matrix<dlib::rgb_pixel> rgb_img;
 
-    uint32_t num_classes;
-    std::set<std::string> tmp_names;
-    std::vector<dlib::rgb_pixel> class_color;
+    //uint32_t num_classes;
+    //std::set<std::string> tmp_names;
+    //std::vector<dlib::rgb_pixel> class_color;
 
-#if !defined(DLIB_NO_GUI_SUPPORT)
+//#if !defined(DLIB_NO_GUI_SUPPORT)
     //create window to display images
-    dlib::image_window win;
-#endif
+//    dlib::image_window win;
+//#endif
 
-    dlib::rand rnd;
-    rnd = dlib::rand(time(NULL));
+//    dlib::rand rnd;
+//    rnd = dlib::rand(time(NULL));
     
     // ----------------------------------------------------------------------------------------
    
-    if (argc == 1)
-    {
-        print_usage();
-        std::cin.ignore();
-        return 0;
-    }
+    //if (argc == 1)
+    //{
+    //    print_usage();
+    //    std::cin.ignore();
+    //    return 0;
+    //}
 
     parse_filename = argv[1];
 
@@ -190,10 +194,10 @@ int main(int argc, char** argv)
 
     std::cout << "Reading Inputs... " << std::endl;
     std::cout << "Platform:              " << platform << std::endl;
-    std::cout << "GPU:                   { ";
-    for (idx = 0; idx < gpu.size(); ++idx)
-        std::cout << gpu[idx] << " ";
-    std::cout << "}" << std::endl;
+//    std::cout << "GPU:                   { ";
+//    for (idx = 0; idx < gpu.size(); ++idx)
+//        std::cout << gpu[idx] << " ";
+//    std::cout << "}" << std::endl;
     std::cout << "program_root:          " << program_root << std::endl;
     std::cout << "save_directory:        " << save_directory << std::endl;
     //std::cout << "results_save_location: " << results_save_location << std::endl;
@@ -212,16 +216,17 @@ int main(int argc, char** argv)
         data_log_stream << "------------------------------------------------------------------" << std::endl;
         data_log_stream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
         data_log_stream << "Platform: " << platform << std::endl;
-        data_log_stream << "GPU: { ";
-        for (idx = 0; idx < gpu.size(); ++idx)
-            data_log_stream << gpu[idx] << " ";
-        data_log_stream << "}" << std::endl;
+//        data_log_stream << "GPU: { ";
+//        for (idx = 0; idx < gpu.size(); ++idx)
+//            data_log_stream << gpu[idx] << " ";
+//        data_log_stream << "}" << std::endl;
         data_log_stream << "------------------------------------------------------------------" << std::endl;
 
 //-----------------------------------------------------------------------------
 // Read in the testing images
 //-----------------------------------------------------------------------------
 
+/*
         //-------------------------------------------------------------------------------------
         // parse through the supplied test input file
         switch (test_input.second)
@@ -285,6 +290,7 @@ int main(int argc, char** argv)
 
         std::cout << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
         data_log_stream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
+*/
         
 //-----------------------------------------------------------------------------
 // Setup the network
@@ -292,7 +298,7 @@ int main(int argc, char** argv)
 
         // this sets th GPUs to use algorithms that are smaller in memory but may take a little longer to execute
         //dlib::set_dnn_prefer_smallest_algorithms();
-        dlib::set_dnn_prefer_fastest_algorithms();
+        //dlib::set_dnn_prefer_fastest_algorithms();
 
         // set the cuda device explicitly
         //if (gpu.size() == 1)
@@ -319,12 +325,19 @@ int main(int argc, char** argv)
 
         long nr = 0, nc = 0;
         uint32_t index = 0;
-
-        for (idx = 0; idx < test_images.size(); ++idx)
+        std::string image_directory = "/home/owner/Projects/object_detection_data/FaceDetection/Data/mod_green/";        
+        
+        cv::Mat img;
+        
+        for (idx = 0; idx < test_image_names.size(); ++idx)
         {
-            nr = test_images[idx][0].nr();
-            nc = test_images[idx][0].nc();
-
+        
+            img = cv::imread(image_directory + test_image_names[idx], cv::IMREAD_GRAYSCALE);
+            
+            nr = img.rows;
+            nc = img.cols;
+            
+/*
             unsigned char *te = new unsigned char[nr * nc];
             index = 0;
             for (long r = 0; r < nr; ++r)
@@ -334,19 +347,21 @@ int main(int argc, char** argv)
                     te[index++] = test_images[idx][0](r, c);
                 }
             }
+*/
 
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
-            get_detections(te, nr, nc, &num_dets, detects);
-            run_net(te, nr, nc, det_img, &num_dets, dets);
-
+            get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
+            run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
             stop_time = chrono::system_clock::now();
+            
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
+            
             sleep_ms(100);
 
             std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            std::cout << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
+            std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << test_image_names[idx] << std::endl;
+            std::cout << "Image Size (h x w): " << nr << "x" << nc << std::endl;
             std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
 
             for (jdx = 0; jdx < num_dets; ++jdx)

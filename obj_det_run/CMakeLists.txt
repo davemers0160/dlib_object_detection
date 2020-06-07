@@ -54,18 +54,21 @@ if(WIN32)
 else()
     if(${PLATFORM} STREQUAL "HPC")
         set(COMMON_ROOT "~/Projects/Common")
-        set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-        include(~/dlib-19.19/dlib/cmake)
+        #set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+        #include(~/dlib-19.19/dlib/cmake)
     elseif(${PLATFORM} STREQUAL "MainGear")
         set(COMMON_ROOT "~/Projects/Common")
-        set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-        include(~/dlib-19.18/dlib/cmake)
+        #set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+        #include(~/dlib-19.18/dlib/cmake)
     else()
         set(COMMON_ROOT "~/Projects/Common")
-        set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-        include(~/dlib-19.19/dlib/cmake)
+        #set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+        #include(~/dlib-19.19/dlib/cmake)
     endif()
 endif()
+
+include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
+include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
 if(WITH_OBJ_LIB)
 
@@ -128,16 +131,22 @@ message(" ")
 
 include_directories(${project_includes})
 add_executable(${exe_name} ${SOURCES})
-target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${OBJ_DET_LIBS})
+
 
 if(WIN32)
+    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${OBJ_DET_LIBS})
     message("MSVC Version: " ${MSVC_VERSION})
     # uncomment for MSVC and cmake greater than 3.6.0
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
         target_compile_options(${exe_name} PRIVATE "/MP")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
+    
+else()
+    target_link_libraries(${exe_name} ${OpenCV_LIBS} ${OBJ_DET_LIBS})
 endif()
 
+message(" ")
 message("Build Complete!")
 message(" ")
+
