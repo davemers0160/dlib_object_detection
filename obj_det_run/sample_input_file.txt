@@ -3,17 +3,14 @@
 #0 version name: this is used as the prepend to all files, must end with "_"
 tfd_v02_
 
-#1 GPU: this tells the code which GPU to target
-0
+#1 network: this tells the code which trained network file to load
+D:/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat
+#/home/owner/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat
 
-#2 network: this tells the code which trained network file to load
-#D:/Projects/dlib_object_detection/obj_det_run/nets/50766_0/nets/fd_v10a_HPC_final_net.dat
-/home/owner/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat
-
-#3 test data file: this is the file that contains the list of associated test data, text file format
+#2 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
 D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 0
 #/home/owner/Projects/object_detection_data/FaceDetection/thermal_face_test_v1.txt, 0
 
-#4 root location where the results will be saved -> must have the following folders: nets, results, result_images
-../results/tfd_v02/
+#3 root location where the results will be saved -> must have the following folders: nets, results, result_images
+../results/
