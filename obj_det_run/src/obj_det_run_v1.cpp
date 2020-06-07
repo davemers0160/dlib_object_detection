@@ -356,7 +356,7 @@ int main(int argc, char** argv)
 
         }
 
-        close();
+        close_lib();
 
 #else
         // load the network from the saved file
