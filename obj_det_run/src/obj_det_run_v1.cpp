@@ -176,9 +176,11 @@ int main(int argc, char** argv)
         switch (test_input.second)
         {
         case 0:
+            std::cout << "parsing grouped csv file..." << std::endl;
             parse_group_csv_file(test_input.first, '{', '}', test_file);
             break;
         case 1:
+            std::cout << "parsing standard csv file..." << std::endl;
             parse_csv_file(test_input.first, test_file);
             break;
         }
@@ -189,7 +191,7 @@ int main(int argc, char** argv)
             std::cout << test_input.first << ": ";
             throw std::runtime_error("Test file is empty");
         }
-
+        
         // the data directory should be the first entry in the input file
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
         test_data_directory = test_file[0][0];
@@ -233,8 +235,8 @@ int main(int argc, char** argv)
 
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
+            //run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
             get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
-            run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
             stop_time = chrono::system_clock::now();
             
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
@@ -253,8 +255,8 @@ int main(int argc, char** argv)
 
             for (jdx = 0; jdx < num_dets; ++jdx)
             {
-                std::cout << "Detection: " << detects[jdx].name << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
-                data_log_stream << "Detection: " << detects[jdx].name << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
+                std::cout << "Detection: " << std::string(detects[jdx].name) << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
+                data_log_stream << "Detection: " << std::string(detects[jdx].name) << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
             }
 
         }
