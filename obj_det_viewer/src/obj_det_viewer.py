@@ -64,7 +64,7 @@ void init_net(const char *net_name, unsigned int *num_classes, struct window_str
 void get_pyramid_tiled_input(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned char** tiled_img, unsigned int* t_nr, unsigned int* t_nc);
 void run_net(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char** det_img, unsigned int *num_dets, struct detection_struct** dets);
 void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center** dets);
-void close();
+void close_lib();
 void get_layer_01(struct layer_struct *data, const float** data_params);
 ''')
 
@@ -278,7 +278,7 @@ def on_session_destroyed(session_context):
     global obj_det_lib
     
     print("Closing ...")
-    obj_det_lib.close()
+    obj_det_lib.close_lib()
     
     pass
 

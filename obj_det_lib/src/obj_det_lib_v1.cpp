@@ -250,7 +250,7 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
 }   // end of get_detections
 
 //----------------------------------------------------------------------------------
-void close()
+void close_lib()
 {
     net.~net();
     class_names.clear();

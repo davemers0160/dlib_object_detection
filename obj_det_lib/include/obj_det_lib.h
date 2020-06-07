@@ -144,7 +144,7 @@ extern "C" {
 extern "C" {
 #endif
     // This function will output a vector of the output layer for the final classification layer
-    OBJ_DLL_API void close();
+    OBJ_DLL_API void close_lib();
 #ifdef __cplusplus
 }
 #endif
