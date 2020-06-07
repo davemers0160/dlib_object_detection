@@ -13,6 +13,7 @@
 #include <string>
 
 // Custom Includes
+#include "prune_detects.h"
 //#include "center_cropper.h"
 //#include "dlib_matrix_threshold.h"
 //#include "cyclic_analysis.h"
@@ -311,9 +312,9 @@ dlib::matrix<double, 1, 6> eval_net_performance(
   //  }
   //  else
   //  {
-  //      // run the input image through the network to get the detections
-        //dets = net(input_img);
+        // run the input image through the network to get the detections
         dnn_labels = net(input_img);
+        prune_detects(dnn_labels);
   //  }
 
     // cycle through the ground truth labels and put them in the right bins (truth box, ignore)
@@ -349,7 +350,6 @@ dlib::matrix<double, 1, 6> eval_net_performance(
 
     //correct_hits += small_correct_hits;
     num_gt = truth_boxes.size() + small_correct_hits;       // number of ground truth images that are not ignored
-    //num_dets = dets.size();					                // number of detections
     num_dets = dnn_labels.size();					                // number of detections
 
     false_positives = num_dets - correct_hits;

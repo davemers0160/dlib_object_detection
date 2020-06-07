@@ -29,6 +29,9 @@ message("Platform: " ${PLATFORM})
 string(FIND ${PROJECT_SOURCE_DIR} "/" INDEX REVERSE)
 string(SUBSTRING ${PROJECT_SOURCE_DIR} 0 ${INDEX} PR_ROOT)
 
+# Build Options
+option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+
 if(WIN32)
     if(${PLATFORM} STREQUAL "Laptop")
         set(COMMON_ROOT "D:/Common")
