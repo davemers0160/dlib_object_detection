@@ -250,6 +250,14 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
 }   // end of get_detections
 
 //----------------------------------------------------------------------------------
+void close()
+{
+    net.~net();
+    class_names.clear();
+    class_color.clear();
+}
+
+//----------------------------------------------------------------------------------
 void get_layer_01(struct layer_struct *data, const float* &data_params)
 {
     auto& lo = dlib::layer<1>(net).get_output();

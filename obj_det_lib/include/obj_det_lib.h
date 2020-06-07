@@ -144,6 +144,16 @@ extern "C" {
 extern "C" {
 #endif
     // This function will output a vector of the output layer for the final classification layer
+    OBJ_DLL_API void close();
+#ifdef __cplusplus
+}
+#endif
+
+// ----------------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
+    // This function will output a vector of the output layer for the final classification layer
     OBJ_DLL_API void get_layer_01(struct layer_struct *data, const float* &data_params);
 #ifdef __cplusplus
 }

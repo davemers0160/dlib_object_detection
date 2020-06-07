@@ -64,6 +64,7 @@ void init_net(const char *net_name, unsigned int *num_classes, struct window_str
 void get_pyramid_tiled_input(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned char** tiled_img, unsigned int* t_nr, unsigned int* t_nc);
 void run_net(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char** det_img, unsigned int *num_dets, struct detection_struct** dets);
 void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center** dets);
+void close();
 void get_layer_01(struct layer_struct *data, const float** data_params);
 ''')
 
@@ -271,6 +272,22 @@ def update_plots():
         #fs[idx].tools[0].tooltips = {"Value": "$l01_list[idx]"}
 
     bp = 1
+
+def on_session_destroyed(session_context):
+    ''' If present, this function is called when a session is closed. '''
+    global obj_det_lib
+    
+    print("Closing ...")
+    obj_det_lib.close()
+    
+    pass
+
+def on_server_unloaded(server_context):
+    ''' If present, this function is called when the server shuts down. '''
+    
+    print("Closing ...")
+
+    pass
 
 # the main entry point into the code
 # if __name__ == '__main__':

@@ -355,6 +355,9 @@ int main(int argc, char** argv)
             }
 
         }
+
+        close();
+
 #else
         // load the network from the saved file
         anet_type test_net;
