@@ -1,4 +1,4 @@
-# Object Detector Library Code
+# Object Detector Library Project
 
 This project is designed to compile a dlib object detection network into a dynamically linked library (*.dll/*.so) so that is can be used byt other code/projects.
 
