@@ -68,12 +68,7 @@ std::string platform;
 std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> test_images;
 std::vector<std::vector<dlib::mmod_rect>> test_labels;
 
-// containers to store the random crops used during each training iteration and groundtruth data for the bounding box labels
-//std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> train_batch_samples, test_batch_samples;
-//std::vector<std::vector<dlib::mmod_rect>> train_batch_labels, test_batch_labels;
-
 std::string version;
-//std::string net_name = "obj_det_net_";
 std::string logfileName = "obj_det_net_log_";
 
 // ----------------------------------------------------------------------------
@@ -88,13 +83,10 @@ void get_platform_control(void)
     }
 
     version = version + platform;
-    //net_sync_name = version + "_sync";
     logfileName = version + "_log_";
-    //net_name = version +  "_final_net.dat";
 }
 
-// ----------------------------------------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 void print_usage(void)
 {
     std::cout << "Enter the following as arguments into the program:" << std::endl;
@@ -102,8 +94,7 @@ void print_usage(void)
     std::cout << endl;
 }
 
-// ----------------------------------------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 
@@ -122,23 +113,16 @@ int main(int argc, char** argv)
     std::string parse_filename;
     std::string program_root;
     std::string save_directory;
-    //std::string sync_save_location;
-    //std::string image_save_location;
-    //std::string results_save_location;
 
-    //std::string train_inputfile;
     std::string test_inputfile;
-    //std::string train_class_name;
     std::string trained_net_file;
 
     std::pair<std::string, uint8_t> test_input;
     std::string test_data_directory;
-    //std::vector<std::vector<std::string>> training_file;
     std::vector<std::vector<std::string>> test_file;
     std::vector<std::string> te_image_files;
 
-    // these two matrices will contain the results of the training and testing
-    //dlib::matrix<double, 1, 6> training_results = dlib::zeros_matrix<double>(1, 6);
+    // this matrix will contain the results of the testing
     dlib::matrix<double, 1, 6> test_results = dlib::zeros_matrix<double>(1, 6);
 
     std::ofstream data_log_stream;
@@ -171,7 +155,6 @@ int main(int argc, char** argv)
 
     parse_filename = argv[1];
 
-
     // parse through the supplied csv file
     parse_input_file(parse_filename, version, gpu, trained_net_file, test_input, save_directory);
 
@@ -190,8 +173,6 @@ int main(int argc, char** argv)
     // setup save variable locations
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
     program_root = get_path(get_path(get_path(std::string(argv[0]), "\\"), "\\"), "\\") + os_file_sep;
-    //results_save_location = save_directory + "results/";
-    //image_save_location = save_directory + "result_images/";
 
 #else
     if (HPC == 1)
@@ -202,11 +183,8 @@ int main(int argc, char** argv)
     else
     {
         // Ubuntu
-        program_root = "/home/owner/Projects/dlib_obj_detector/";
+        program_root = get_ubuntu_path();
     }
-
-    //results_save_location = save_directory + "results/";
-    //image_save_location = save_directory + "result_images/";
 
 #endif
 
@@ -226,10 +204,7 @@ int main(int argc, char** argv)
 
         get_current_time(sdate, stime);
         logfileName = logfileName + sdate + "_" + stime + ".txt";
-        //cropper_stats_file = output_save_location + "cr_stats_" + version + "_" + sdate + "_" + stime + ".txt";
 
-        //std::cout << "Log File:              " << (results_save_location + logfileName) << std::endl << std::endl;
-        //data_log_stream.open((results_save_location + logfileName), ios::out | ios::app);
         std::cout << "Log File:              " << (save_directory + logfileName) << std::endl << std::endl;
         data_log_stream.open((save_directory + logfileName), ios::out | ios::app);
 

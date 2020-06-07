@@ -7,7 +7,7 @@ tfd_v02_
 0
 
 #2 network: this tells the code which trained network file to load
-D:/Projects/dlib_obj_det_run/nets/50766_0/nets/fd_v10a_HPC_final_net.dat
+D:/Projects/dlib_object_detection/obj_det_run/nets/50766_0/nets/fd_v10a_HPC_final_net.dat
 #/home/owner/Projects/dlib_obj_det_run/nets/50920_0/nets/tfd_v02_35_40_100_HPC_final_net.dat
 
 #3 test data file: this is the file that contains the list of associated test data, text file format

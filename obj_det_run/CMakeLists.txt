@@ -70,16 +70,17 @@ endif()
 if(WITH_OBJ_LIB)
 
     if(WIN32)
-        set(OBJ_DET_DIRS "D:/Projects/obj_det_lib/include")
-        set(OBJ_DET_LIBS "D:/Projects/obj_det_lib/build/Release/obj_det.lib")     
+        set(OBJ_DET_DIRS "${PR_ROOT}/obj_det_lib/include")
+        set(OBJ_DET_LIBS "${PR_ROOT}/obj_det_lib/build/Release/obj_det.lib")     
     else()
-        set(OBJ_DET_DIRS "~/Projects/obj_det_lib/include")
-        set(OBJ_DET_LIBS "~/Projects/obj_det_lib/build/libobj_det.so")
+        set(OBJ_DET_DIRS "${PR_ROOT}/obj_det_lib/include")
+        set(OBJ_DET_LIBS "${PR_ROOT}/obj_det_lib/build/libobj_det.so")
     endif()
 
     add_definitions(-DUSE_OBJ_LIB)
     add_definitions(-DBUILD_LIB)
 
+    message(STATUS "Building with object detection library")
 endif()
 
 # grab all of the *.cpp files in the src directory
