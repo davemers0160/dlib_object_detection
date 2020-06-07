@@ -4,16 +4,16 @@
 #include <string>
 #include <vector>
 
-#if !defined(BUILD_LIB)
+//#if !defined(BUILD_LIB)
+// Custom includes
+#if defined(USE_OPENCV)
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#endif
-
-// Custom includes
-#if defined(USE_OPENCV)
 #include "overlay_bounding_box.h"
 #endif
+//#endif
+
 
 #include "file_ops.h"
 #include "obj_det_lib.h"
@@ -24,8 +24,6 @@
 #include <dlib/dnn.h>
 #include <dlib/data_io.h>
 #include <dlib/image_transforms.h>
-
-using namespace std;
 
 //----------------------------------------------------------------------------------
 // library internal state variables:
@@ -377,8 +375,6 @@ int main(int argc, char** argv)
 
         dlib::matrix<uint8_t> ti;
 
-        uint32_t ch = 0;
-
         // run through some images to test the code
         for (idx = 0; idx < test_images.size(); ++idx)
         {
@@ -386,28 +382,13 @@ int main(int argc, char** argv)
             nr = img.rows;
             nc = img.cols;
 
-            ch = img.channels();
+            unsigned char* image = new unsigned char[nr * nc]{ 0 };
 
-            unsigned char* image = new unsigned char[nr * nc * ch]{ 0 };
-
-            //uint32_t index = 0;
-            //for (long r = 0; r < nr; ++r)
-            //{
-            //    for (long c = 0; c < nc; ++c)
-            //    {
-            //        image[index++] = img.at<cv::Vec3b>(r, c)[2];
-            //        image[index++] = img.at<cv::Vec3b>(r, c)[1];
-            //        image[index++] = img.at<cv::Vec3b>(r, c)[0];
-            //    }
-            //}
             start_time = std::chrono::system_clock::now();
 
-            // void run_net(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char* &tiled_img, unsigned int *t_nr, unsigned int *t_nc, unsigned char* &det_img, unsigned int *num_dets, struct detection_struct* &dets);
-            //unsigned char* img2 = img.ptr<unsigned char>(0);
             run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
 
             get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
-
 
             stop_time = std::chrono::system_clock::now();
             elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);

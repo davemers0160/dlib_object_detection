@@ -36,6 +36,7 @@ string(FIND ${PROJECT_SOURCE_DIR} "/" INDEX REVERSE)
 string(SUBSTRING ${PROJECT_SOURCE_DIR} 0 ${INDEX} PR_ROOT)
 
 # Build Options
+option(DLIB_NO_GUI_SUPPORT "Enable this if you don't want to compile any of the dlib GUI code" ON)
 option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
 option(BUILD_LIB  "Build the project into a library (.dll/.so) vs a standalone executable"  ON)
 option(WITH_OPENCV  "Build the project with OpenCV"  OFF)
@@ -96,7 +97,12 @@ if(BUILD_LIB AND UNIX)
     set(SOURCES ${SOURCES} "${DLIB_ROOT}/dlib/all/source.cpp")
     set(project_includes ${project_includes} ${DLIB_ROOT})
 endif()
-   
+
+
+if(NOT BUILD_LIB)
+    set(WITH_OPENCV 1)
+endif()
+
 # ----------------------------------------------------------------------------
 # find OpenCV
 if(WITH_OPENCV)
