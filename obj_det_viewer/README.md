@@ -43,4 +43,4 @@ and select one of the images.  The output should look similar to the following:
 
 ![Example Viewer Output](example.png)
 
-The "Select File" button will allow you to select new images to run through the detector.
+Red dots are placed over the object that is detected.  The "Select File" button will allow you to select new images to run through the detector.
