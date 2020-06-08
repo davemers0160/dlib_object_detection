@@ -252,6 +252,7 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
 //----------------------------------------------------------------------------------
 void close_lib()
 {
+    std::cout << "Closing..." << std::endl;
     //net.~net();
     class_names.clear();
     class_color.clear();
@@ -403,6 +404,8 @@ int main(int argc, char** argv)
 
             std::cout << "Runtime (s): " << elapsed_time.count() << std::endl;
         }
+
+        close_lib();
 
     }
     catch (std::exception & e)

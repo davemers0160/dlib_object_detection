@@ -273,21 +273,8 @@ def update_plots():
 
     bp = 1
 
-def on_session_destroyed(session_context):
-    ''' If present, this function is called when a session is closed. '''
-    global obj_det_lib
-    
-    print("Closing ...")
-    obj_det_lib.close_lib()
-    
-    pass
 
-def on_server_unloaded(server_context):
-    ''' If present, this function is called when the server shuts down. '''
-    
-    print("Closing ...")
 
-    pass
 
 # the main entry point into the code
 # if __name__ == '__main__':
@@ -368,6 +355,17 @@ doc = curdoc()
 doc.title = "Object Detection Viewer"
 doc.add_root(layout)
 # doc.add_periodic_callback(update_plots, update_time)
+
+def cleanup_session(session_context):
+    ''' If present, this function is called when a session is closed. '''
+    global obj_det_lib
+    print(session_context)
+    print("Closing ...")
+    obj_det_lib.close_lib()
+
+
+doc.on_session_destroyed(cleanup_session)
+
 
 # doc.hold('combine')
 
