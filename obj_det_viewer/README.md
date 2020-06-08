@@ -4,6 +4,8 @@ This is a python project that links to the [dynamic library](https://github.com/
 
 ## Dependencies
 
+This project has the following dependencies:
+
 1. The requirements listing in requirements.txt
 2. [Object Detector Library](https://github.com/davemers0160/dlib_object_detection/tree/master/obj_det_lib)
 

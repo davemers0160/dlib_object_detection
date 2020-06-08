@@ -3,7 +3,7 @@ This project designed to train an object detectors build on the dlib framework.
 
 ## Dependencies
 
-The code in this repository has the following dependecies:
+The code in this project has the following dependecies:
 
 1. [CMake 2.8.12+](https://cmake.org/download/)
 2. [dlib library](http://dlib.net/ )
