@@ -20,7 +20,7 @@ For dlib it should be compiled as a dynamic library.  Starting from the dlib fol
 mkdir build
 cd build
 cmake -DBUILD_SHARED_LIBS=1 ..
-make
+make -j10
 sudo make install
 sudo ldconfig
 ```
