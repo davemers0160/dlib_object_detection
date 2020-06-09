@@ -31,7 +31,7 @@
 
 // Net Version
 //#include "yj_net_v10.h"
-#include "tfd_net_v01.h"
+#include "tfd_net_v03.h"
 #include "load_data.h"
 #include "eval_net_performance.h"
 //#include "enhanced_array_cropper.h"

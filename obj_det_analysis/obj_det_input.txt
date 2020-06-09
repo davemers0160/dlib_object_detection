@@ -8,11 +8,11 @@ D:/Projects/object_detection_data/FaceDetection/thermal_face_test_v1.txt, 0
 #/home/owner/Projects/object_detection_data/FaceDetection/thermal_face_test_v1.txt, 0
 
 #2 network: this tells the code which trained network file to load
-D:/Projects/dlib_obj_det_run/nets/50918_0/nets/tfd_v02_30_30_100_HPC_final_net.dat
-#/home/owner/Projects/dlib_obj_det_run/nets/50920_0/nets/tfd_v02_35_40_100_HPC_final_net.dat
+D:/Projects/dlib_object_detection/obj_det_run/nets/51183_0/nets/tfd_v03_20_20_100_HPC_final_net.dat
+#/home/owner/Projects/dlib_object_detection/obj_det_run/nets/50920_0/nets/tfd_v02_35_40_100_HPC_final_net.dat
 
 #3 version name: this is used as the prepend to all files, must end with "_"
 tfd_v02_
 
 #4 root location where the results will be saved -> must have the following folders: nets, results, result_images
-../results/tfd_v02/
+../results/tfd_v03/
