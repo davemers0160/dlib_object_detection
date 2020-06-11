@@ -100,8 +100,9 @@ void get_platform_control(void)
 
 void print_usage(void)
 {
+    std::cout << "The wrong number of parameters was entered..." << std::endl;
     std::cout << "Enter the following as arguments into the program:" << std::endl;
-    std::cout << "<image file name> " << std::endl;
+    std::cout << "<training_input_filename> " << std::endl;
     std::cout << endl;
 }
 
@@ -146,6 +147,7 @@ int main(int argc, char** argv)
     crop_info ci;
 
     std::pair<uint32_t, uint32_t> target_size;  // min_target_size, max_target_size
+    double min_window_overlap;
 
     std::vector<int32_t> gpu;
     uint64_t one_step_calls = 0;
@@ -180,7 +182,8 @@ int main(int argc, char** argv)
     std::string parse_filename = argv[1];
 
     // parse through the supplied csv file
-    parse_input_file(parse_filename, version, gpu, stop_criteria, tp, train_input, test_input, ci, target_size, filter_num, save_directory);
+    parse_input_file(parse_filename, version, gpu, stop_criteria, tp, train_input, test_input, ci, \
+                     target_size, min_window_overlap, filter_num, save_directory);
 
     // check the platform
     get_platform_control();
@@ -507,7 +510,7 @@ int main(int argc, char** argv)
             dlib::cuda::set_device(gpu[0]);
 
         // For further details see the mmod_options documentation.
-        dlib::mmod_options options(train_labels, target_size.second, target_size.first, 0.90);
+        dlib::mmod_options options(train_labels, target_size.second, target_size.first, min_window_overlap);
 
         // example of how to push back a custion window
         // options.detector_windows.push_back(dlib::mmod_options::detector_window_details(114, 103));

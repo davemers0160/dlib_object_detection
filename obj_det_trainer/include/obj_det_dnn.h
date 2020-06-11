@@ -56,6 +56,7 @@ void parse_input_file(std::string parse_filename,
     std::pair<std::string, uint8_t> &test_input,
     crop_info &ci, 
     std::pair<uint32_t, uint32_t> &target_size, 
+    double &min_detector_window_overlap_iou,
     std::vector<uint32_t> &filter_num,
     std::string &save_directory
 )
@@ -81,7 +82,7 @@ void parse_input_file(std::string parse_filename,
                     gpu.clear();
                     for (int jdx = 0; jdx < params[idx].size(); ++jdx)
                     {
-                        gpu.push_back(stol(params[idx][jdx]));
+                        gpu.push_back(std::stol(params[idx][jdx]));
                     }
                 }
                 catch (std::exception &e) {
@@ -112,7 +113,7 @@ void parse_input_file(std::string parse_filename,
             // get the training parameters
             case 3:
                 try {
-                    tp = training_params(stod(params[idx][0]), stod(params[idx][1]), stod(params[idx][2]), stol(params[idx][3]));
+                    tp = training_params(std::stod(params[idx][0]), std::stod(params[idx][1]), std::stod(params[idx][2]), std::stol(params[idx][3]));
                 }
                 catch (std::exception &e) {
                     std::cout << e.what() << std::endl;
@@ -144,7 +145,7 @@ void parse_input_file(std::string parse_filename,
             // get the number of crops used for training
             case 6:
                 try {
-                    ci = crop_info(stol(params[idx][0]), stol(params[idx][1]), stol(params[idx][2]), stod(params[idx][3]));
+                    ci = crop_info(std::stol(params[idx][0]), std::stol(params[idx][1]), std::stol(params[idx][2]), std::stod(params[idx][3]));
                 }
                 catch (std::exception &e) {
                     std::cout << e.what() << std::endl;
@@ -182,11 +183,13 @@ void parse_input_file(std::string parse_filename,
             // get the min/max target sizes
             case 7:
                 try {
-                    target_size = std::make_pair(stol(params[idx][0]), stol(params[idx][1]));
+                    target_size = std::make_pair(std::stol(params[idx][0]), std::stol(params[idx][1]));
+                    min_detector_window_overlap_iou = std::stod(params[idx][2]);
                 }
                 catch (std::exception &e) {
                     std::cout << e.what() << std::endl;
                     target_size = std::make_pair(35, 70);
+                    min_detector_window_overlap_iou = 0.90;
                 }
                 break;
 
@@ -196,7 +199,7 @@ void parse_input_file(std::string parse_filename,
                     filter_num.clear();
                     for (int jdx = 0; jdx<params[idx].size(); ++jdx)
                     {
-                        filter_num.push_back(stol(params[idx][jdx]));
+                        filter_num.push_back(std::stol(params[idx][jdx]));
                     }
                 }
                 catch (std::exception &e) {
