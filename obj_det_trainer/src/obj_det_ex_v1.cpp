@@ -154,7 +154,7 @@ int main(int argc, char** argv)
     uint64_t epoch = 0;
     uint64_t index = 0;   
     
-    double std = 2.0;
+    double std = 3.0;
 
     dlib::rgb_pixel color;
     dlib::matrix<dlib::rgb_pixel> rgb_img;
@@ -670,7 +670,7 @@ int main(int argc, char** argv)
                 // apply some noise to the image
                 for (auto&& tc : train_batch_samples)
                 {
-                    apply_poisson_noise(tc, std, rnd, 0.0, 255.0);
+                    apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
                 }
 
 #if defined(_DEBUG)

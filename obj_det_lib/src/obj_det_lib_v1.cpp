@@ -36,6 +36,10 @@ std::vector<dlib::rgb_pixel> class_color;
 void init_net(const char *net_name, unsigned int *num_classes, struct window_struct* &det_win, unsigned int *num_win)
 {
     uint32_t idx;
+    int gpu = 0;
+
+    dlib::cuda::set_device(gpu);
+
     dlib::deserialize(net_name) >> net;
 
     // Get the type of pyramid the CNN used
