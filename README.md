@@ -1,4 +1,4 @@
-# dlib_obj_detector
+# Object Detection Repository using Dlib
 This repository is a combination of several object detection projects based on the dlib library.
 
 ## Dependencies
