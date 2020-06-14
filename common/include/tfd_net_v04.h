@@ -115,26 +115,26 @@ input[4] -> downsampler -> rcon3 -> rcon3 -> rcon3 -> con6
 using net_type = dlib::loss_mmod<con9<1,
 
     dlib::relu<dlib::bn_con<con91<32,con19<32,
-    dlib::relu<dlib::bn_con<con9<32,con19<32,
-    dlib::relu<dlib::bn_con<con9<32,con19<32,
+    dlib::relu<dlib::bn_con<con91<32,con19<32,
+    dlib::relu<dlib::bn_con<con91<32,con19<32,
 
     dlib::relu<dlib::bn_con<con5d<32, 
     dlib::relu<dlib::bn_con<con5d<32, 
     
     dlib::tag10<dlib::input_array_image_pyramid<dlib::pyramid_down<6>, array_depth>>
-    >>> >>> >>> >>> >>> >>;
+    >>> >>> >>>> >>>> >>>> >>;
 
 using anet_type = dlib::loss_mmod<con9<1,
 
-    dlib::relu<dlib::affine<con5<32,
-    dlib::relu<dlib::affine<con5<32,
-    dlib::relu<dlib::affine<con5<32,
+    dlib::relu<dlib::affine<con91<32,con19<32,
+    dlib::relu<dlib::affine<con91<32,con19<32,
+    dlib::relu<dlib::affine<con91<32,con19<32,
 
     dlib::relu<dlib::affine<con5d<32, 
     dlib::relu<dlib::affine<con5d<32, 
 
     dlib::tag10<dlib::input_array_image_pyramid<dlib::pyramid_down<6>, array_depth>>
-    >>> >>> >>> >>> >>> >>;
+    >>> >>> >>>> >>>> >>>> >>;
 
 // ----------------------------------------------------------------------------------------
 // Configuration function
