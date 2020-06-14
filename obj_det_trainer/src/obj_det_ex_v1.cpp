@@ -1007,6 +1007,7 @@ int main(int argc, char** argv)
 
         // output the training results
         std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "class_name, accuracy, correct_detects, groundtruth" << std::endl;
         for (jdx = 0; jdx < num_classes; ++jdx)
         {
             double acc = (train_label_stats[jdx].count == 0) ? 0.0 : train_label_stats[jdx].match_count / (double)train_label_stats[jdx].count;
@@ -1018,6 +1019,7 @@ int main(int argc, char** argv)
 
         // output the test results
         std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "class_name, accuracy, correct_detects, groundtruth" << std::endl;
         for (jdx = 0; jdx < num_classes; ++jdx)
         {
             double acc = (test_label_stats[jdx].count == 0) ? 0.0 : test_label_stats[jdx].match_count / (double)test_label_stats[jdx].count;
