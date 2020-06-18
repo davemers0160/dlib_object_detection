@@ -236,7 +236,7 @@ results/
 data/
 obj_det_analysis/nets/
 #obj_det_lib/nets/
-obj_det_run/nets/
+#obj_det_run/nets/
 obj_det_trainer/nets/
 
 ###############################################################################
