@@ -14,7 +14,7 @@
 #endif
 //#endif
 
-
+// Custom includes
 #include "file_ops.h"
 #include "obj_det_lib.h"
 #include "tfd_net_v03.h"
@@ -29,6 +29,8 @@
 // library internal state variables:
 anet_type net;
 double pyr_scale;
+unsigned long outer_padding;
+unsigned long padding;
 std::vector<std::string> class_names;
 std::vector<dlib::rgb_pixel> class_color;
 
@@ -47,6 +49,9 @@ void init_net(const char *net_name, unsigned int *num_classes, struct window_str
     pyramid_type tmp_pyr;
     pyr_scale = dlib::pyramid_rate(tmp_pyr);    
     
+    outer_padding = dlib::input_layer(net).get_pyramid_outer_padding();
+    padding = dlib::input_layer(net).get_pyramid_padding();
+
     // get the details about the loss layer -> the number and names of the classes
     dlib::mmod_options options = dlib::layer<0>(net).loss_details().get_options();
     
@@ -260,7 +265,74 @@ void close_lib()
     //net.~net();
     class_names.clear();
     class_color.clear();
-}
+}   // end of close_lib
+
+//----------------------------------------------------------------------------------
+//void get_combined_output(unsigned char* input_img, unsigned int nr, unsigned int nc, float*& data_params)
+void get_combined_output(struct layer_struct* data, const float*& data_params)
+{
+    //// copy the first output window into a float matrix
+    dlib::matrix<float> network_output = dlib::image_plane(net.subnet().get_output(), 0, 0);
+
+    //// get the remaining window outputs and max pool across windows
+    for (long k = 1; k < net.subnet().get_output().k(); ++k)
+        network_output = dlib::max_pointwise(network_output, dlib::image_plane(net.subnet().get_output(), 0, k));
+
+    data_params = new float[network_output.size()];
+    memcpy((void*)data_params, &network_output(0, 0), network_output.size() * sizeof(float));
+
+    data->k = 1;
+    data->n = 1;
+    data->nr = network_output.nr();
+    data->nc = network_output.nc();
+    data->size = network_output.size();
+
+/*
+    const double network_output_scale = nc / (double)network_output.nc();
+    dlib::resize_image(network_output_scale, network_output);
+
+    data_params = new float[nr*nc];
+   
+    std::array<dlib::matrix<unsigned char>, 1> img;
+    img[0] = dlib::mat(input_img, nr, nc);
+    //dlib::matrix<float> collapsed(nr, nc);
+    dlib::resizable_tensor input_tensor;
+    input_layer(net).to_tensor(&img, &img +1, input_tensor);
+
+    long r, c;
+    for (r = 0; r < nr; ++r)
+    {
+        for (c = 0; c < nc; ++c)
+        {
+            // Loop over a bunch of scale values and look up what part of network_output
+            // corresponds to the point(c,r) in the original image, then take the max
+            // detection score over all the scales and save it at pixel point(c,r).
+            float max_score = -1e30;
+            for (double scale = 1; scale > 0.2; scale *= pyr_scale)
+            {
+                // Map from input image coordinates to tiled pyramid coordinates.
+                dlib::dpoint tmp = center(input_layer(net).image_space_to_tensor_space(input_tensor, scale, dlib::drectangle(dlib::dpoint(c, r))));
+                
+                // Now map from pyramid coordinates to network_output coordinates.
+                tmp = dlib::point(network_output_scale * input_tensor_to_output_tensor(net, tmp));
+
+                if (dlib::get_rect(network_output).contains(tmp))
+                {
+                    float val = network_output(tmp.y(), tmp.x());
+                    if (val > max_score)
+                        max_score = val;
+                }
+            }
+            //collapsed(r, c) = max_score;
+            data_params[r*nc + c] = max_score;
+        }
+    }
+
+    //data_params = new float[collapsed.nr() * collapsed.nc()];
+    //memcpy((void*)data_params, &collapsed(0, 0), collapsed.size() * sizeof(float));
+*/
+}   // end of get_combined_output
+
 
 //----------------------------------------------------------------------------------
 void get_layer_01(struct layer_struct *data, const float* &data_params)
@@ -375,13 +447,13 @@ int main(int argc, char** argv)
     program_root = get_ubuntu_path();
 #endif
 
-    net_directory = program_root + "nets/";
+    net_directory = program_root + "../common/nets/";
     //image_directory = program_root + "images/";
     image_directory = "D:/Projects/object_detection_data/FaceDetection/Data/mod_green/";
 
     try
     {
-        test_net_name = (net_directory + "fd_v10a_HPC_final_net.dat");
+        test_net_name = (net_directory + "tfd_v03_20_20_100_HPC_final_net.dat");
 
         // initialize the network
         init_net(test_net_name.c_str(), &num_classes, det, &num_win);
@@ -402,6 +474,18 @@ int main(int argc, char** argv)
             run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
 
             get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
+
+            // get the layer 1 detection map
+            //layer_struct ls_01;
+            //const float* ld_01;
+            //get_layer_01(&ls_01, ld_01);
+
+            // get the combined detection map
+            layer_struct ls_all;
+            const float* ld_all;
+            //get_combined_output(img.ptr<unsigned char>(0), nr, nc, ld_all);
+            get_combined_output(&ls_all, ld_all);
+
 
             stop_time = std::chrono::system_clock::now();
             elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);

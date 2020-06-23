@@ -149,6 +149,17 @@ extern "C" {
 }
 #endif
 
+
+// ----------------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
+    // This function will output a vector of the output layer for the final classification layer
+    //OBJ_DLL_API void get_combined_output(unsigned char* input_img, unsigned int nr, unsigned int nc, float* &data_params);
+    OBJ_DLL_API void get_combined_output(struct layer_struct* data, const float*& data_params);
+#ifdef __cplusplus
+}
+#endif
 // ----------------------------------------------------------------------------------------
 #ifdef __cplusplus
 extern "C" {

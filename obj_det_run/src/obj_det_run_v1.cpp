@@ -241,7 +241,18 @@ int main(int argc, char** argv)
             
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
             
+
+            layer_struct ls_01;
+            const float* ld_01 = NULL;
+
+            //get_layer_01(&ls_01, ld_01);
+            get_combined_output(&ls_01, ld_01);
+
+
+
             sleep_ms(100);
+
+
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << test_file[idx][0] << std::endl;
