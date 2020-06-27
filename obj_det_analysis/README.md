@@ -65,7 +65,7 @@ The -- -j4 tells the make to use 4 cores to build the code.  This number can be 
 
 ## Running
 
-The code is run by supplying all of the parameters in a single file.  Using this method all of the input parametes must be supplied and they must be in the order outlined in the example file *obj_det_input.txt*
+The code is run by supplying all of the parameters in a single file.  Using this method all of the input parameters must be supplied and they must be in the order outlined in the example file *obj_det_input.txt*
 
 To use the file enter the following:
 
