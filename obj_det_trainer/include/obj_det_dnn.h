@@ -57,6 +57,7 @@ void parse_input_file(std::string parse_filename,
     crop_info &ci, 
     std::pair<uint32_t, uint32_t> &target_size, 
     double &min_detector_window_overlap_iou,
+    std::array<float, array_depth>& avg_color,
     std::vector<uint32_t> &filter_num,
     std::string &save_directory
 )
@@ -193,8 +194,22 @@ void parse_input_file(std::string parse_filename,
                 }
                 break;
 
-            // get the number conv filters for each layer
+            // get the average color value for each channel
             case 8:
+                try {
+                    for (int jdx = 0; jdx < array_depth; ++jdx)
+                    {
+                        avg_color[jdx] = std::stof(params[idx][jdx]);
+                    }
+                }
+                catch (std::exception& e) {
+                    avg_color.fill(128);
+                    std::cout << e.what() << std::endl;
+                    std::cout << "Error getting average color values.  Setting all values to 128." << std::endl;
+                }
+                break;
+            // get the number conv filters for each layer
+            case 9:
                 try {
                     filter_num.clear();
                     for (int jdx = 0; jdx<params[idx].size(); ++jdx)
@@ -210,7 +225,7 @@ void parse_input_file(std::string parse_filename,
                 }
                 break;
 
-            case 9:
+            case 10:
                 save_directory = params[idx][0];
                 break;
 

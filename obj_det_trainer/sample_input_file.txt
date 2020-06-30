@@ -27,8 +27,11 @@ D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 
 #7 bounding box configuration: min_target_size, max_target_size, min_detector_window_overlap_iou
 35, 40, 0.90
 
-#8 number of filters to use per layer: must be >= to the number of filters in the network
+#8 the average color per channel
+127.0, 128.0, 126.0
+
+#9 number of filters to use per layer: must be >= to the number of filters in the network
 1, 10, 10, 6, 5, 4, 3
 
-#9 root location where the results will be saved -> must have the following folders: nets, results, result_images
+#10 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/
