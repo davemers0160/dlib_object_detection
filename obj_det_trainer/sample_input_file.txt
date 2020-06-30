@@ -1,7 +1,7 @@
 # data file for loading information into dlib based dnn projects
 
 #0 version name: this is used as the prepend to all files, must end with "_"
-tfd_v02a_
+tfd_v04a_
 
 #1 GPU: this tells the code which GPU to target
 0
@@ -31,7 +31,7 @@ D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 
 127.0, 128.0, 126.0
 
 #9 number of filters to use per layer: must be >= to the number of filters in the network
-1, 10, 10, 6, 5, 4, 3
+1, 16,16, 16,16, 16,16, 16, 16
 
 #10 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/

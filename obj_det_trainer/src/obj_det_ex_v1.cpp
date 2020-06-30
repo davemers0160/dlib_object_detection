@@ -213,7 +213,7 @@ int main(int argc, char** argv)
     else
     {
         // Ubuntu
-        program_root = "/home/owner/Projects/dlib_obj_detector/";
+        program_root = get_ubuntu_path();
     }
 
     sync_save_location = save_directory + "nets/";
