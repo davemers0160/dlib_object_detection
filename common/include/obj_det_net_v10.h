@@ -136,7 +136,7 @@ using anet_type = dlib::loss_mmod<con7<1,
 // ----------------------------------------------------------------------------------------
 
 template <typename net_type>
-net_type config_net(dlib::mmod_options options, std::vector<uint32_t> params)
+net_type config_net(dlib::mmod_options options, std::array<float, array_depth> avg_color, std::vector<uint32_t> params)
 {
 
     net_type net = net_type(options, dlib::num_con_outputs(params[0]),
@@ -157,6 +157,7 @@ net_type config_net(dlib::mmod_options options, std::vector<uint32_t> params)
     );
 
     net.subnet().layer_details().set_num_filters(options.detector_windows.size());
+    dlib::layer<net_type::num_layers - 1>(net).set_avg_color(avg_color);
 
     return net;
 
