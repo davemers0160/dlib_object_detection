@@ -8,7 +8,7 @@
 
 #include "input_array_image_pryamid.h"
 
-extern const uint32_t array_depth = 1;
+extern const uint32_t array_depth = 3;
 //extern const uint32_t secondary = 1;
 
 // --------------------------------- Conv Filter Setup ------------------------------------
