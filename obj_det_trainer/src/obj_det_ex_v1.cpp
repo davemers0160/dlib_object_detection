@@ -19,7 +19,6 @@
 #include <stdexcept>
 
 // Custom includes
-#include "obj_det_dnn.h"
 #include "get_platform.h"
 #include "get_current_time.h"
 #include "num2string.h"
@@ -27,8 +26,10 @@
 
 // Net Version
 //#include "yj_net_v10.h"
-//#include "tfd_net_v04.h"
 #include "obj_det_net_v10.h"
+//#include "tfd_net_v04.h"
+
+#include "obj_det_dnn.h"
 #include "load_data.h"
 #include "load_oid_data.h"
 #include "eval_net_performance.h"
@@ -143,6 +144,7 @@ int main(int argc, char** argv)
     std::vector<std::string> stop_codes = { "Minimum Learning Rate Reached.", "Max Training Time Reached", "Max Training Steps Reached" };
     std::vector<double> stop_criteria;
     training_params tp;
+    std::array<float, array_depth> avg_color;
     std::vector<uint32_t> filter_num;
 
     crop_info ci;
@@ -184,7 +186,7 @@ int main(int argc, char** argv)
 
     // parse through the supplied csv file
     parse_input_file(parse_filename, version, gpu, stop_criteria, tp, train_input, test_input, ci, \
-                     target_size, min_window_overlap, filter_num, save_directory);
+                     target_size, min_window_overlap, avg_color, filter_num, save_directory);
 
     // check the platform
     get_platform_control();
@@ -212,7 +214,7 @@ int main(int argc, char** argv)
     else
     {
         // Ubuntu
-        program_root = "/home/owner/Projects/dlib_obj_detector/";
+        program_root = get_ubuntu_path();
     }
 
     sync_save_location = save_directory + "nets/";
@@ -577,7 +579,7 @@ int main(int argc, char** argv)
 
 
         // Now we are ready to create our network and trainer.
-        net_type net = config_net<net_type>(options, filter_num);
+        net_type net = config_net<net_type>(options, avg_color, filter_num);
 
         // The MMOD loss requires that the number of filters in the final network layer equal
         // options.detector_windows.size().  So we set that here as well.
