@@ -545,13 +545,8 @@ int main(int argc, char** argv)
         */
         // ------------------------------------------------------------------------------------
 
-
         // Now we are ready to create our network and trainer.
         net_type net = config_net<net_type>(options, avg_color, filter_num);
-
-        // The MMOD loss requires that the number of filters in the final network layer equal
-        // options.detector_windows.size().  So we set that here as well.
-        //net.subnet().layer_details().set_num_filters(options.detector_windows.size());
 
         dlib::dnn_trainer<net_type, dlib::adam> trainer(net, dlib::adam(0.0001, 0.9, 0.99),  gpu);
         trainer.set_learning_rate(tp.intial_learning_rate);

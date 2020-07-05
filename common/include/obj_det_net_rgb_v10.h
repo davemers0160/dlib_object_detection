@@ -5,6 +5,8 @@
 #include "dlib/dnn.h"
 #include "dlib/dnn/core.h"
 
+const uint32_t pyramid_size = 4;
+
 // --------------------------------- Conv Filter Setup ------------------------------------
 template <long num_filters, typename SUBNET> using con1 = dlib::con<num_filters, 1, 1, 1, 1, SUBNET>;
 template <long num_filters, typename SUBNET> using con3 = dlib::con<num_filters, 3, 3, 1, 1, SUBNET>;
@@ -113,7 +115,7 @@ using net_type = dlib::loss_mmod<con7<1,
     con2d<64, res_blk3<64,64,32, cbp3_blk<64,
     con2d<32, res_blk5<32,32,16, cbp5_blk<32,
 
-    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<4>>>
+    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
     >>> >>> >> >>;
 
 using anet_type = dlib::loss_mmod<con7<1,
@@ -122,7 +124,7 @@ using anet_type = dlib::loss_mmod<con7<1,
     con2d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
     con2d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
 
-    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<4>>>
+    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
     >>> >>> >> >>;
 
 // ----------------------------------------------------------------------------------------
@@ -147,7 +149,8 @@ net_type config_net(dlib::mmod_options options, std::vector<float> avg_color, st
         dlib::num_con_outputs(params[11]),
         dlib::num_con_outputs(params[12]),
         dlib::num_con_outputs(params[13]),
-        dlib::num_con_outputs(params[14])
+        dlib::num_con_outputs(params[14]),
+        dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>(avg_color[0], avg_color[1], avg_color[2])
     );
 
     net.subnet().layer_details().set_num_filters(options.detector_windows.size());

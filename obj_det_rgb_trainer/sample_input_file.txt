@@ -30,7 +30,7 @@ D:/Projects/object_detection_data/dc/test/dc_test_full_input.txt, 0
 20, 20, 0.80
 
 #8 the average color per channel
-101.4441, 109.7964,  93.7233
+101.4441, 109.7964, 93.7233
 
 #9 number of filters to use per layer: must be >= to the number of filters in the network
 #1, 16,16, 16,16, 16,16, 16, 16
