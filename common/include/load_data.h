@@ -22,8 +22,8 @@
 
 extern const uint32_t array_depth;
 
-// --------------------------------------------------------
-
+// ----------------------------------------------------------------------------
+/*
 template<typename img_type, typename pyramid_type, typename interpolation_type>
 void dataset_downsample(
     img_type &img,
@@ -52,9 +52,9 @@ void dataset_downsample(
         labels[idx].rect = pyr.rect_down(labels[idx].rect);
     }
 }
+*/
 
-// --------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 void read_labels(
     const std::vector<std::string> data_file,
     std::vector<dlib::mmod_rect> &labels
@@ -77,8 +77,7 @@ void read_labels(
 
 }   // end of read_labels
 
-// --------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 void read_group_labels(
     const uint32_t start,
     const std::vector<std::string> params,
@@ -143,8 +142,7 @@ void read_group_labels(
 
 }   // end of read_group_labels
 
-// --------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 template<typename img_type>
 void load_single_set(
     const std::string data_directory,
@@ -247,8 +245,7 @@ void load_single_set(
 
 }   // end of load_single_set
 
-// --------------------------------------------------------
-
+// ----------------------------------------------------------------------------
 template<typename img_type>
 void load_data(
     const std::vector<std::vector<std::string>> data_file,
@@ -285,6 +282,92 @@ void load_data(
 
     }   // end of the read in data loop
 
-}   // end of loadData
+}   // end of load_data
+
+
+// ----------------------------------------------------------------------------
+template<typename pixel_type>
+void load_single_rgb_set(
+    const std::string data_directory,
+    const std::vector<std::string> data_file,
+    dlib::matrix<pixel_type>& img,
+    std::vector<dlib::mmod_rect>& labels,
+    uint32_t image_type = 1
+)
+{
+    uint32_t start;
+
+    dlib::matrix<dlib::rgb_pixel> t1;
+
+    std::string image_file = data_directory + data_file[0];
+              
+	// load in the RGB image with 3 or more channels - ignoring everything after RGB		
+    dlib::load_image(t1, image_file);
+
+    switch (image_type)
+    {
+        // case for converting an RGB image to grayscale image
+        case 0:           
+            //dlib::rgb2gray(t1, img);
+            start = 1;
+            break;
+
+        // case for loading an RGB image
+        case 1:
+            start = 1;
+            break;
+
+        // case for loaing a BGR image
+        case 2:
+            dlib::assign_image(img, t1);
+            start = 1;
+            break;
+
+    }   // end of switch case
+
+    // load in the label data
+    read_group_labels(start, data_file, labels);
+
+}   // end of load_single_set
+
+// ----------------------------------------------------------------------------
+template<typename pixel_type>
+void load_rgb_data(
+    const std::vector<std::vector<std::string>> data_file,
+    const std::string data_directory,
+    std::vector<dlib::matrix<pixel_type>> &img,
+	std::vector<std::vector<dlib::mmod_rect>> &labels,
+    std::vector<std::string> &image_files,
+    uint32_t image_type = 1
+)
+{
+    uint32_t idx;
+
+    std::string image_file, depth_file;
+    //img_type t;
+
+    // clear out the container for the focus and defocus filenames
+	img.clear();
+	labels.clear();
+
+    for (idx = 0; idx < data_file.size(); idx++)
+    {
+        dlib::matrix<pixel_type> tmp_img;
+        std::vector<dlib::mmod_rect> tmp_label;
+
+        // get the image filenames
+		image_file = data_directory + data_file[idx][0];
+        image_files.push_back(image_file);
+
+        // load the image and labels
+        load_single_rgb_set(data_directory, data_file[idx], tmp_img, tmp_label, image_type);
+
+        // push back the image and labels 
+		img.push_back(tmp_img);
+		labels.push_back(tmp_label);
+
+    }   // end of the read in data loop
+
+}   // end of load_data
 
 #endif  // LOAD_DATA_H
