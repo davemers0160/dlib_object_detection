@@ -61,7 +61,7 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-extern const uint32_t array_depth;
+//extern const uint32_t array_depth;
 std::string platform;
 
 //this will store the standard RGB images and groundtruth data for the bounding box labels

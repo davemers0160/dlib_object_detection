@@ -314,6 +314,7 @@ void load_single_rgb_set(
 
         // case for loading an RGB image
         case 1:
+            dlib::assign_image(img, t1);
             start = 1;
             break;
 

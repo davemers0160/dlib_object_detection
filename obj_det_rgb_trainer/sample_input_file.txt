@@ -1,7 +1,7 @@
 # data file for loading information into dlib based dnn projects
 
 #0 version name: this is used as the prepend to all files, must end with "_"
-dc_3_v10_20_20_100_
+dc_rgb_v10_20_20_100_
 
 #1 GPU: this tells the code which GPU to target
 0
