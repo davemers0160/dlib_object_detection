@@ -26,12 +26,12 @@
 
 // Net Version
 //#include "yj_net_v10.h"
-#include "obj_det_net_v10.h"
+#include "obj_det_net_rgb_v11.h"
 //#include "tfd_net_v04.h"
 
 #include "obj_det_dnn.h"
 #include "load_data.h"
-#include "load_oid_data.h"
+//#include "load_oid_data.h"
 #include "eval_net_performance.h"
 //#include "enhanced_array_cropper.h"
 //#include "random_channel_swap.h"
@@ -50,8 +50,8 @@
 #endif
 
 // dlib-contrib includes
-#include "array_image_operations.h"
-#include "random_array_cropper.h"
+//#include "array_image_operations.h"
+//#include "random_array_cropper.h"
 #include "image_noise_functions.h"
 
 
@@ -61,25 +61,22 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-extern const uint32_t array_depth;
+//extern const uint32_t array_depth;
 std::string platform;
 
 //this will store the standard RGB images and groundtruth data for the bounding box labels
 //std::vector<dlib::matrix<dlib::rgb_pixel>> train_images, test_images;
-std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> train_images, test_images;
-//std::array<dlib::matrix<uint8_t>, array_depth> train_image, test_image;
-//std::vector<dlib::mmod_rect> train_label, test_label;
+std::vector<dlib::matrix<dlib::rgb_pixel>> train_images, test_images;
 std::vector<std::vector<dlib::mmod_rect>> train_labels, test_labels;
 
 // containers to store the random crops used during each training iteration and groundtruth data for the bounding box labels
-std::vector<std::array<dlib::matrix<uint8_t>, array_depth>> train_batch_samples, test_batch_samples;
+std::vector<dlib::matrix<dlib::rgb_pixel>> train_batch_samples, test_batch_samples;
 std::vector<std::vector<dlib::mmod_rect>> train_batch_labels, test_batch_labels;
 
 std::string version;
 std::string net_name = "obj_det_net_";
 std::string net_sync_name = "obj_det_sync_";
 std::string logfileName = "obj_det_net_log_";
-//std::string gorgon_savefile = "gorgon_obj_det_";
 
 // ----------------------------------------------------------------------------
 void get_platform_control(void)
@@ -144,7 +141,7 @@ int main(int argc, char** argv)
     std::vector<std::string> stop_codes = { "Minimum Learning Rate Reached.", "Max Training Time Reached", "Max Training Steps Reached" };
     std::vector<double> stop_criteria;
     training_params tp;
-    std::array<float, array_depth> avg_color;
+    std::vector<float> avg_color;
     std::vector<uint32_t> filter_num;
 
     crop_info ci;
@@ -260,15 +257,7 @@ int main(int argc, char** argv)
 //-----------------------------------------------------------------------------
 
         // parse through the supplied training input file
-        switch(train_input.second)
-        {
-        case 0:
-            parse_group_csv_file(train_input.first, '{', '}', training_file);
-            break;
-        case 1:
-            parse_csv_file(train_input.first, training_file);
-            break;
-        }
+        parse_group_csv_file(train_input.first, '{', '}', training_file);
 
         if (training_file.size() == 0)
         {
@@ -305,15 +294,9 @@ int main(int argc, char** argv)
 
         // load in the images and labels
         start_time = chrono::system_clock::now();
-        switch (train_input.second)
-        {
-        case 0:
-            load_data(training_file, train_data_directory, train_images, train_labels, tr_image_files);
-            break;
-        case 1:
-            load_oid_data(training_file, train_data_directory, train_images, train_labels, tr_image_files);
-            break;
-        }
+
+        load_rgb_data(training_file, train_data_directory, train_images, train_labels, tr_image_files, 1);
+
 
         // this is placeholder code for selecting a specific class, removing all other classes
         //std::string class_name = "test2";
@@ -393,15 +376,7 @@ int main(int argc, char** argv)
 
         //-------------------------------------------------------------------------------------
         // parse through the supplied test input file
-        switch (test_input.second)
-        {
-        case 0:
-            parse_group_csv_file(test_input.first, '{', '}', test_file);
-            break;
-        case 1:
-            parse_csv_file(test_input.first, test_file);
-            break;
-        }
+        parse_group_csv_file(test_input.first, '{', '}', test_file);
 
         //parse_group_csv_file(test_inputfile, '{', '}', test_file);
         if (test_file.size() == 0)
@@ -438,15 +413,8 @@ int main(int argc, char** argv)
 
         // load in the images and labels
         start_time = chrono::system_clock::now();
-        switch (test_input.second)
-        {
-        case 0:
-            load_data(test_file, test_data_directory, test_images, test_labels, te_image_files);
-            break;
-        case 1:
-            load_oid_data(test_file, test_data_directory, test_images, test_labels, te_image_files);
-            break;
-        }
+        load_rgb_data(test_file, test_data_directory, test_images, test_labels, te_image_files, 1);
+
         //load_data(test_file, test_data_directory, test_images, test_labels, te_image_files);
         stop_time = chrono::system_clock::now();
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
@@ -577,13 +545,8 @@ int main(int argc, char** argv)
         */
         // ------------------------------------------------------------------------------------
 
-
         // Now we are ready to create our network and trainer.
         net_type net = config_net<net_type>(options, avg_color, filter_num);
-
-        // The MMOD loss requires that the number of filters in the final network layer equal
-        // options.detector_windows.size().  So we set that here as well.
-        //net.subnet().layer_details().set_num_filters(options.detector_windows.size());
 
         dlib::dnn_trainer<net_type, dlib::adam> trainer(net, dlib::adam(0.0001, 0.9, 0.99),  gpu);
         trainer.set_learning_rate(tp.intial_learning_rate);
@@ -596,7 +559,7 @@ int main(int argc, char** argv)
         // set the batch normalization stats window to something big
         dlib::set_all_bn_running_stats_window_sizes(net, 1000);
 
-        dlib::random_array_cropper cropper;
+        dlib::random_cropper cropper;
 
         cropper.set_seed(time(NULL));
 
@@ -673,7 +636,7 @@ int main(int argc, char** argv)
                 // apply some noise to the image
                 for (auto&& tc : train_batch_samples)
                 {
-                    apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
+                    apply_rgb_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
                 }
 
 #if defined(_DEBUG)
@@ -859,13 +822,13 @@ int main(int argc, char** argv)
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << tr_image_files[idx] << std::endl;
-            std::cout << "Image Size (h x w): " << train_images[idx][0].nr() << "x" << train_images[idx][0].nc() << std::endl;
+            std::cout << "Image Size (h x w): " << train_images[idx].nr() << "x" << train_images[idx].nc() << std::endl;
             std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
             //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
             DataLogStream << "------------------------------------------------------------------" << std::endl;
             DataLogStream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << tr_image_files[idx] << std::endl;
-            DataLogStream << "Image Size (h x w): " << train_images[idx][0].nr() << "x" << train_images[idx][0].nc() << std::endl;
+            DataLogStream << "Image Size (h x w): " << train_images[idx].nr() << "x" << train_images[idx].nc() << std::endl;
             DataLogStream << "Classification Time (s): " << elapsed_time.count() << std::endl;
             //DataLogStream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
@@ -881,13 +844,9 @@ int main(int argc, char** argv)
             std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
             DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
-            if (array_depth < 3)
-                dlib::assign_image(rgb_img, train_images[idx][0]);
-            else
-                merge_channels(train_images[idx], rgb_img);
-
 #if !defined(DLIB_NO_GUI_SUPPORT)
             win.clear_overlay();
+            dlib::assign_image(rgb_img, train_images[idx]);
 
             //overlay the dnn detections on the image
             for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
@@ -942,13 +901,13 @@ int main(int argc, char** argv)
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            std::cout << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
+            std::cout << "Image Size (h x w): " << test_images[idx].nr() << "x" << test_images[idx].nc() << std::endl;
             std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
             //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
             DataLogStream << "------------------------------------------------------------------" << std::endl;
             DataLogStream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            DataLogStream << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
+            DataLogStream << "Image Size (h x w): " << test_images[idx].nr() << "x" << test_images[idx].nc() << std::endl;
             DataLogStream << "Classification Time (s): " << elapsed_time.count() << std::endl;
             //DataLogStream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
@@ -964,13 +923,14 @@ int main(int argc, char** argv)
             std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
             DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
-            if (array_depth < 3)
-                dlib::assign_image(rgb_img, test_images[idx][0]);
-            else
-                merge_channels(test_images[idx], rgb_img);
+            //if (array_depth < 3)
+            //    
+            //else
+            //    merge_channels(test_images[idx], rgb_img);
 
 #if !defined(DLIB_NO_GUI_SUPPORT)
             win.clear_overlay();
+            dlib::assign_image(rgb_img, test_images[idx]);
 
             //overlay the dnn detections on the image
             for (jdx = 0; jdx < dnn_labels.size(); ++jdx)

@@ -37,16 +37,14 @@ typedef struct label_stats {
     //label_stats(std::vector<uint32_t> c, std::vector<uint32_t> mc, std::vector<double> da) : count(c), match_count(mc), det_acc(da) {}
     label_stats(uint32_t c, uint32_t mc) : count(c), match_count(mc) {}
 
+    label_stats(uint32_t c, uint32_t mc, uint32_t md, uint32_t fp) : count(c), match_count(mc), missed_detects(md), false_positives(fp) {}
     //std::vector<std::string> label;
     //std::vector<bool> match_found;
 
-    //std::vector<uint32_t> count; 
-    //std::vector<uint32_t> match_count;
-    //std::vector<double> det_acc;
-
     uint32_t count;
     uint32_t match_count;
-    //double det_acc;
+    uint32_t missed_detects;
+    uint32_t false_positives;
 
 } label_stats;
 
