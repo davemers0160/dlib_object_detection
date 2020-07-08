@@ -17,24 +17,22 @@
 #include <string>
 #include <utility>
 #include <stdexcept>
-#include <tuple>
 
 // Custom includes
 #include "obj_detector.h"
 #include "get_platform.h"
 #include "file_ops.h"
 #include "get_current_time.h"
-//#include "gorgon_capture.h"
 #include "num2string.h"
 #include "overlay_bounding_box.h"
-//#include "add_border.h"
 
 // Net Version
-//#include "yj_net_v10.h"
-#include "tfd_net_v03.h"
+#include "obj_det_net_v10.h"
+//#include "tfd_net_v03.h"
 #include "load_data.h"
 #include "eval_net_performance.h"
 //#include "enhanced_array_cropper.h"
+//#include "random_array_cropper.h"
 //#include "random_channel_swap.h"
 //#include "enhanced_channel_swap.h"
 
@@ -42,7 +40,6 @@
 
 
 // dlib includes
-//#include "random_array_cropper.h"
 #include <dlib/dnn.h>
 #include <dlib/image_io.h>
 #include <dlib/data_io.h>
@@ -197,7 +194,7 @@ int main(int argc, char** argv)
         parse_group_csv_file(test_inputfile, '{', '}', test_file);
         if (test_inputfile.size() == 0)
         {
-            throw std::exception("Test file is empty");
+            throw std::runtime_error("Test file is empty");
         }
 
         // the data directory should be the first entry in the input file
@@ -358,7 +355,7 @@ int main(int argc, char** argv)
             //overlay the dnn detections on the image
             for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
             {
-                auto& class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
+                vector<string>::iterator class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
                 overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
 
                 DataLogStream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
