@@ -2,5 +2,7 @@ D:/Projects/dlib_object_detection/obj_det_lib/images/, ../../obj_det_lib/images/
 
 mframe_00156.png
 mframe_00163.png
+mframe_00279.png
 mframe_00353.png
+mframe_05042.png
 

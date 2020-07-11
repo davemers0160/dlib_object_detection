@@ -143,6 +143,17 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // This function will take an grayscale image in unsigned char row major order [r0,c0, r0,c1, r0,c2,...]
+    // as an input and will return the centers of the detections in the image
+    OBJ_DLL_API void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_center*& dets);
+#ifdef __cplusplus
+}
+#endif
+
+// ----------------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
     // This function will output a vector of the output layer for the final classification layer
     OBJ_DLL_API void close_lib();
 #ifdef __cplusplus
@@ -171,16 +182,15 @@ extern "C" {
 #endif
 
 //// ----------------------------------------------------------------------------------------
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-//    //MNIST_DLL_API void get_layer_02(struct layer_struct &data, const float* &data_params);
-//    OBJ_DLL_API void get_layer_02(layer_struct *data, const float **data_params);
-//#ifdef __cplusplus
-//}
-//#endif
-//
-//// ----------------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
+    OBJ_DLL_API void get_input_layer(struct layer_struct *data, const float* &data_params);
+#ifdef __cplusplus
+}
+#endif
+
+// ----------------------------------------------------------------------------------------
 //#ifdef __cplusplus
 //extern "C" {
 //#endif

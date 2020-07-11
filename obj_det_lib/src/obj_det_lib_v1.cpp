@@ -198,7 +198,7 @@ void run_net(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigne
         }
 #endif
 
-        det_img = new unsigned char[tmp_img.nr() * tmp_img.nc() * 3];
+        det_img = new unsigned char[tmp_img.nr() * tmp_img.nc() * 3L];
 
         idx = 0;
         for (r = 0; r < nr; ++r)
@@ -257,6 +257,60 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
     }
 
 }   // end of get_detections
+
+//----------------------------------------------------------------------------------
+void get_cropped_detections(unsigned char* input_img, 
+    unsigned int nr, 
+    unsigned int nc, 
+    unsigned int x,
+    unsigned int y,
+    unsigned int w,
+    unsigned int h,
+    unsigned int* num_dets, 
+    struct detection_center*& dets
+)
+{
+    uint64_t idx = 0;
+
+    dlib::matrix<dlib::rgb_pixel> img(nr, nc);
+    std::array<dlib::matrix<uint8_t>, array_depth> a_img;
+
+    uint64_t size = (uint64_t)nr * (uint64_t)nc;
+
+    dlib::rectangle rect(x, y, w + x - 1, h + y - 1);
+
+    try
+    {
+        // copy the pointer into the input image.  The format is assumed to be row-major order
+        // and if the array_depth (number of channels) is greater than 1 then channels are not interleaved
+        for (idx = 0; idx < array_depth; ++idx)
+        {
+            dlib::matrix<unsigned char> tmp = dlib::mat<unsigned char>((input_img + (idx * (size))), (long)nr, (long)nc);
+            a_img[idx] = dlib::subm(tmp, rect);
+        }
+
+        std::vector<dlib::mmod_rect> d = net(a_img);
+
+        prune_detects(d, 0.3);
+
+        *num_dets = d.size();
+        dets = new detection_center[d.size()];
+
+        for (idx = 0; idx < d.size(); ++idx)
+        {
+            dlib::point c = dlib::center(d[idx].rect);
+            dets[idx] = detection_center(c.x(), c.y(), d[idx].label.c_str());
+        }
+    }
+    catch (std::exception e)
+    {
+        std::cout << "Error in get_detections function:" << std::endl;
+        std::cout << e.what() << std::endl;
+    }
+
+}   // end of get_detections
+
+
 
 //----------------------------------------------------------------------------------
 void close_lib()
@@ -347,18 +401,18 @@ void get_layer_01(struct layer_struct *data, const float* &data_params)
 }
 
 //----------------------------------------------------------------------------------
-//void get_layer_02(layer_struct *data, const float **data_params)
-//{
-//    auto& lo = dlib::layer<2>(net).get_output();
-//    data->k = lo.k();
-//    data->n = lo.num_samples();
-//    data->nr = lo.nr();
-//    data->nc = lo.nc();
-//    data->size = lo.size();
-//    *data_params = lo.host();
-//}
-//
-////----------------------------------------------------------------------------------
+void get_input_layer(layer_struct *data, const float* &data_params)
+{
+    auto& lo = dlib::layer<net_type::num_layers - 2>(net).get_output();
+    data->k = lo.k();
+    data->n = lo.num_samples();
+    data->nr = lo.nr();
+    data->nc = lo.nc();
+    data->size = lo.size();
+    data_params = lo.host();
+}
+
+//----------------------------------------------------------------------------------
 //void get_layer_05(layer_struct *data, const float **data_params)
 //{
 //    auto& lo = dlib::layer<5>(net).get_output();
@@ -425,7 +479,7 @@ int main(int argc, char** argv)
     auto elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);
 
     //std::vector<std::string> test_images = { "test1.png", "test2.png", "test3.png", "test4.png", "test5.png", "test6.png", "test7.png", "test8.png", "test9.png", "test10.png" };
-    std::vector<std::string> test_images = { "mframe_05042.png", "mframe_00279.png", "mframe_00156.png", "mframe_00163.png", "mframe_00353.png"};
+    std::vector<std::string> test_images = { "mframe_00156.png", "mframe_00163.png", "mframe_00279.png", "mframe_00353.png", "mframe_05042.png" };
 
     unsigned int num_classes, num_win;
 
@@ -448,8 +502,7 @@ int main(int argc, char** argv)
 #endif
 
     net_directory = program_root + "../common/nets/";
-    //image_directory = program_root + "images/";
-    image_directory = "D:/Projects/object_detection_data/FaceDetection/Data/mod_green/";
+    image_directory = "../images/";
 
     try
     {
@@ -475,17 +528,16 @@ int main(int argc, char** argv)
 
             get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
 
-            // get the layer 1 detection map
-            //layer_struct ls_01;
-            //const float* ld_01;
-            //get_layer_01(&ls_01, ld_01);
+            get_cropped_detections(img.ptr<unsigned char>(0), nr, nc, 128, 0, 256, 256, &num_dets, detects);
+
+            layer_struct ls_all, ls_in;
+            const float* ld_all, *ld_in;
+
+            // get the input after the pyramid
+            get_input_layer(&ls_in, ld_in);
 
             // get the combined detection map
-            layer_struct ls_all;
-            const float* ld_all;
-            //get_combined_output(img.ptr<unsigned char>(0), nr, nc, ld_all);
             get_combined_output(&ls_all, ld_all);
-
 
             stop_time = std::chrono::system_clock::now();
             elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);
