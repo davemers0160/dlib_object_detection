@@ -121,9 +121,14 @@ int main(int argc, char** argv)
 
     dlib::rand rnd;
     rnd = dlib::rand(time(NULL));
-    
-    // ----------------------------------------------------------------------------------------
-   
+
+    //uint64_t missing_detections = 0;
+    //uint64_t false_positives = 0;
+    uint64_t match_count = 0;
+    uint64_t num_gt = 0;
+    double acc = 0.0;
+
+    // ---------------------------------------------------------------------------------------- 
 	if (argc == 1)
 	{
 		print_usage();
@@ -185,16 +190,16 @@ int main(int argc, char** argv)
 		DataLogStream << "------------------------------------------------------------------" << std::endl;
 		DataLogStream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
 		DataLogStream << "Platform: " << platform << std::endl;
-		DataLogStream << "------------------------------------------------------------------" << std::endl;
+		DataLogStream << std::endl;
 
 		///////////////////////////////////////////////////////////////////////////////
 		// Step 1: Read in the test images
 		///////////////////////////////////////////////////////////////////////////////
 
         parse_group_csv_file(test_inputfile, '{', '}', test_file);
-        if (test_inputfile.size() == 0)
+        if (test_file.size() == 0)
         {
-            throw std::runtime_error("Test file is empty");
+            throw std::runtime_error("The data input file is empty or unreadable (" + test_inputfile + ")");
         }
 
         // the data directory should be the first entry in the input file
@@ -279,11 +284,12 @@ int main(int argc, char** argv)
 
         std::vector<std::string> class_names(tmp_names.begin(), tmp_names.end());
         uint32_t num_classes = class_names.size();
-        std::vector<label_stats> test_label_stats(num_classes, label_stats(0, 0));
+        std::vector<label_stats> test_label_stats(num_classes, label_stats(0, 0, 0, 0));
 
         std::vector<dlib::rgb_pixel> class_color;
         for (idx = 0; idx < num_classes; ++idx)
         {
+            test_label_stats[idx].label = class_names[idx];
             class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
         }
 
@@ -292,26 +298,20 @@ int main(int argc, char** argv)
 
         DataLogStream << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
         DataLogStream << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
-        DataLogStream << std::endl << "------------------------------------------------------------------" << std::endl;
-
-        //// Get the type of pyramid the CNN used
-        //using pyramid_type = std::remove_reference<decltype(dlib::input_layer(test_net))>::type::pyramid_type;
-
-        //pyramid_type tmp_pyr;
-        //double pyr_scale = dlib::pyramid_rate(tmp_pyr);
+        DataLogStream << std::endl;
 
 //-----------------------------------------------------------------------------
 //          EVALUATE THE FINAL NETWORK PERFORMANCE
 //-----------------------------------------------------------------------------
+        std::cout << std::endl << "Analyzing Test Results..." << std::endl;
+
         // this matrix will contain the results of the training and testing
 		dlib::matrix<double, 1, 6> test_results = dlib::zeros_matrix<double>(1, 6);
-
-        std::cout << std::endl << "Analyzing Test Results..." << std::endl;
 
 		for (idx = 0; idx < test_images.size(); ++idx)
         {
             std::vector<dlib::mmod_rect> dnn_labels;
-            std::vector<label_stats> ls(num_classes, label_stats(0, 0));
+            std::vector<label_stats> ls(num_classes, label_stats(0, 0, 0, 0));
 
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
@@ -336,13 +336,17 @@ int main(int argc, char** argv)
             {
                 test_label_stats[jdx].count += ls[jdx].count;
                 test_label_stats[jdx].match_count += ls[jdx].match_count;
+                test_label_stats[jdx].false_positives += ls[jdx].false_positives;
+                test_label_stats[jdx].missed_detects += ls[jdx].missed_detects;
 
-                double acc = (ls[jdx].count == 0) ? 0.0 : ls[jdx].match_count / (double)ls[jdx].count;
-                std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count << std::endl;
-                DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count << std::endl;
+                acc = (ls[jdx].count == 0) ? 0.0 : ls[jdx].match_count / (double)ls[jdx].count;
+                std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc;
+                std::cout << ", " << ls[jdx].match_count << ", " << ls[jdx].count << ", " << ls[jdx].false_positives << ", " << ls[jdx].missed_detects << std::endl;
+                DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc;
+                DataLogStream << ", " << ls[jdx].match_count << ", " << ls[jdx].count << ls[jdx].false_positives << ", " << ls[jdx].missed_detects << std::endl;
             }
-            std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
+            std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0,1) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
+            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 1) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
             if (array_depth < 3)
                 dlib::assign_image(rgb_img, test_images[idx][0]);
@@ -370,6 +374,7 @@ int main(int argc, char** argv)
 
             test_results += tr;
             dlib::sleep(100);
+
             //std::cin.ignore();
 
 /*
@@ -422,11 +427,10 @@ int main(int argc, char** argv)
                     //}
                 }
             }
-            // If you look at this image you can see that the vehicles have bright red blobs on
-            // them.  That's the CNN saying "there is a car here!".  You will also notice there is
-            // a certain scale at which it finds cars.  They have to be not too big or too small,
-            // which is why we have an image pyramid.  The pyramid allows us to find cars of all
-            // scales.
+            // If you look at this image you can see that the objects have bright red blobs on
+            // them.  You will also notice there is a certain scale at which it finds objects.  
+            // They have to be not too big or too small, which is why we have an image pyramid.  
+            // The pyramid allows us to find objects of all scales.
             dlib::image_window win_pyr_overlay(tiled_img, "Detection scores on image pyramid");
 */
 
@@ -435,27 +439,39 @@ int main(int argc, char** argv)
         DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
-        // output the test results
+        // output the combined test results
         std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
+        
+        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        DataLogStream << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
+
+        match_count = 0;
+        num_gt = 0;
         for (jdx = 0; jdx < num_classes; ++jdx)
         {
-            double acc = (test_label_stats[jdx].count == 0) ? 0.0 : test_label_stats[jdx].match_count / (double)test_label_stats[jdx].count;
-            std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << std::endl;
+            acc = (test_label_stats[jdx].count == 0) ? 0.0 : test_label_stats[jdx].match_count / (double)test_label_stats[jdx].count;
+            std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", ";
+            std::cout << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << ", " << test_label_stats[jdx].false_positives << ", " << test_label_stats[jdx].missed_detects << std::endl;
+
+            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", ";
+            DataLogStream << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << ", " << test_label_stats[jdx].false_positives << ", " << test_label_stats[jdx].missed_detects << std::endl;
+
+            match_count += test_label_stats[jdx].match_count;
+            num_gt += test_label_stats[jdx].count;
         }
-        std::cout << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+
+        acc = (num_gt == 0) ? 0.0 : match_count / (double)num_gt;
+
+        std::cout << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << acc;
+        std::cout << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        DataLogStream << "class_name, detction_accuracy, correct_detects, groundtruth" << std::endl;
-        for (jdx = 0; jdx < num_classes; ++jdx)
-        {
-            double acc = (test_label_stats[jdx].count == 0) ? 0.0 : test_label_stats[jdx].match_count / (double)test_label_stats[jdx].count;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << std::endl;
-        }
+        DataLogStream << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << acc;
+        DataLogStream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
         DataLogStream << "------------------------------------------------------------------" << std::endl;
 
-        std::cout << "End of Program." << std::endl;
+        std::cout << std::endl << "End of Program." << std::endl;
         DataLogStream.close();
         std::cin.ignore();
         

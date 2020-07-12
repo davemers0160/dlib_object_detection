@@ -34,13 +34,27 @@ typedef struct label_stats {
 
     label_stats() = default;
 
-    //label_stats(std::vector<uint32_t> c, std::vector<uint32_t> mc, std::vector<double> da) : count(c), match_count(mc), det_acc(da) {}
-    label_stats(uint32_t c, uint32_t mc) : count(c), match_count(mc) {}
+    label_stats(std::string l_) : label(l_)
+    {
+        count = 0;
+        match_count = 0;
+        missed_detects = 0;
+        false_positives = 0;
+    }
 
-    label_stats(uint32_t c, uint32_t mc, uint32_t md, uint32_t fp) : count(c), match_count(mc), missed_detects(md), false_positives(fp) {}
-    //std::vector<std::string> label;
-    //std::vector<bool> match_found;
+    label_stats(uint32_t c, uint32_t mc) : count(c), match_count(mc) 
+    {
+        missed_detects = 0;
+        false_positives = 0;
+        label = "";
+    }
 
+    label_stats(uint32_t c, uint32_t mc, uint32_t md, uint32_t fp) : count(c), match_count(mc), missed_detects(md), false_positives(fp) 
+    {
+        label = "";
+    }
+    
+    std::string label;
     uint32_t count;
     uint32_t match_count;
     uint32_t missed_detects;
@@ -137,7 +151,7 @@ inline uint64_t get_number_of_truth_hits(
     //const std::vector<std::pair<double, dlib::rectangle>> &boxes,
     const std::vector<dlib::mmod_rect> &boxes,
     const fda_test_box_overlap &overlap_tester,
-    std::vector<std::pair<double, bool>> &all_dets,
+    //std::vector<std::pair<double, bool>> &all_dets,
     uint64_t &missing_detections,
     const std::vector<std::string> label_names,
     std::vector<label_stats> &ls
@@ -187,12 +201,6 @@ inline uint64_t get_number_of_truth_hits(
     uint64_t count = 0;
     std::vector<bool> used(boxes.size(), false);
 
-    //ls.match_found.clear();
-    //ls.label.resize(label_names.size());
-    //ls.count.resize(label_names.size(), 0);
-    //ls.match_count.resize(label_names.size(), 0);
-    //ls.det_acc.resize(label_names.size(), 0.0);
-
     for (idx = 0; idx < ground_truth_boxes.size(); ++idx)
     {
         label_index = 0;
@@ -221,24 +229,39 @@ inline uint64_t get_number_of_truth_hits(
                 continue;
 
             //if (overlap_tester(ground_truth_boxes[idx].get_rect(), boxes[jdx].second))
-            if ((overlap_tester(ground_truth_boxes[idx].rect, boxes[jdx].rect)) && (ground_truth_boxes[idx].label.compare(boxes[jdx].label) == 0))
+            if (overlap_tester(ground_truth_boxes[idx].rect, boxes[jdx].rect))
             {
-                used[jdx] = true;
-                ++count;
-                found_match = true;
-                //ls.match_count[label_index] += 1;
-                ++ls[label_index].match_count;
-                break;
+                if (ground_truth_boxes[idx].label.compare(boxes[jdx].label) == 0)
+                {
+                    used[jdx] = true;
+                    ++count;
+                    found_match = true;
+                    ++ls[label_index].match_count;
+                    break;
+                }
+                else
+                {
+                    uint32_t fp_index = 0;
+                    for (auto& ln : label_names)
+                    {
+                        if (ln.compare(boxes[jdx].label) == 0)
+                        {
+                            break;
+                        }
+                        ++fp_index;
+                    }
+                    ++ls[fp_index].false_positives;
+                    break;
+                }
             }
         }
 
         if (!found_match)
+        {
             ++missing_detections;
+            ++ls[label_index].missed_detects;
+        }
     }
-
-
-
-
 
     //for (idx = 0; idx < boxes.size(); ++idx)
     //{
@@ -250,17 +273,12 @@ inline uint64_t get_number_of_truth_hits(
     //}
 
     return count;
-}
-
-
+}   // end of get_number_of_truth_hits
 
 //-----------------------------------------------------------------------------
-
 // this function will perform the evaluation of the network performance for an
-// img_type of dlib::matrix<dlib::rgb_pixel> 
-template <typename net_type, typename img_type>
-
 //to use the original net for evaluation, put an & before 'net' in net_type; to duplicate net, remove &
+template <typename net_type, typename img_type>
 dlib::matrix<double, 1, 6> eval_net_performance(
     net_type &net,
     img_type &input_img,    
@@ -284,7 +302,7 @@ dlib::matrix<double, 1, 6> eval_net_performance(
     double detction_accuracy = 0.0; 
 
     //label_stats ls;
-    std::vector<std::pair<double, bool>> all_detections;
+    //std::vector<std::pair<double, bool>> all_detections;
     std::vector<dlib::rectangle> ignore_boxes;
     //std::vector<std::pair<double, dlib::rectangle>> boxes;
     //std::vector<dlib::full_object_detection> truth_boxes;
@@ -339,10 +357,12 @@ dlib::matrix<double, 1, 6> eval_net_performance(
     {
         boxes.push_back(std::make_pair(dets[idx].detection_confidence, dets[idx].rect));
         dnn_labels.push_back(dets[idx]);
-    }   */ 
+    }   
+*/ 
 
     // get the correct number of detections
-    correct_hits = get_number_of_truth_hits(truth_boxes, ignore_boxes, dnn_labels, overlap_tester, all_detections, missing_detections, label_names, ls);
+    //correct_hits = get_number_of_truth_hits(truth_boxes, ignore_boxes, dnn_labels, overlap_tester, all_detections, missing_detections, label_names, ls);
+    correct_hits = get_number_of_truth_hits(truth_boxes, ignore_boxes, dnn_labels, overlap_tester, missing_detections, label_names, ls);
     // check the boxes that are smaller than should be detected
     //small_correct_hits = get_number_of_truth_hits(small_truth_boxes, ignore, boxes, overlap_tester, all_detections, small_missing_detections);
 
@@ -361,7 +381,7 @@ dlib::matrix<double, 1, 6> eval_net_performance(
     res = detction_accuracy, (double)num_gt, (double)num_dets, (double)correct_hits, (double)false_positives, (double)missing_detections;
     return res;
 
-}   // end of eval_net_performance_matrix
+}   // end of eval_net_performance
 
 //-----------------------------------------------------------------------------
 
