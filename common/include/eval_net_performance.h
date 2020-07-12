@@ -284,7 +284,7 @@ dlib::matrix<double, 1, 6> eval_net_performance(
     img_type &input_img,    
     std::vector<dlib::mmod_rect> &gt_labels,
     std::vector<dlib::mmod_rect> &dnn_labels,
-    uint32_t min_target_size,
+    //uint32_t min_target_size,
     fda_test_box_overlap overlap_tester,
     const std::vector<std::string> label_names,
     std::vector<label_stats> &ls
@@ -419,8 +419,8 @@ dlib::matrix<double, 1, 6> eval_all_net_performance(
     net_type &net,
     std::vector<img_type> &input_img,    
     std::vector<std::vector<dlib::mmod_rect>> &gt_labels,
-    std::vector<std::vector<dlib::mmod_rect>> &dnn_labels,
-    uint32_t min_target_size
+    std::vector<std::vector<dlib::mmod_rect>> &dnn_labels
+    //uint32_t min_target_size
 )
 {
     uint64_t idx, jdx;
@@ -459,12 +459,14 @@ dlib::matrix<double, 1, 6> eval_all_net_performance(
 			//
 
 			//cycle through each one of the layers in the array and upscale them individually
-			results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, min_target_size, overlap_tester);
-			dnn_labels.push_back(dnn_lab);
+            //results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, min_target_size, overlap_tester);
+            results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, overlap_tester);
+            dnn_labels.push_back(dnn_lab);
 		}
 		else {
-			results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, min_target_size, overlap_tester);
-			dnn_labels.push_back(dnn_lab);
+            //results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, min_target_size, overlap_tester);
+            results += eval_net_performance(net, input_img[idx], gt_labels[idx], dnn_lab, overlap_tester);
+            dnn_labels.push_back(dnn_lab);
 		}
 
     }

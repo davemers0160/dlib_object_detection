@@ -30,7 +30,8 @@
 #include "obj_det_net_v10.h"
 //#include "tfd_net_v03.h"
 #include "load_data.h"
-#include "eval_net_performance.h"
+#include "run_network_performance.h"
+//#include "eval_net_performance.h"
 //#include "enhanced_array_cropper.h"
 //#include "random_array_cropper.h"
 //#include "random_channel_swap.h"
@@ -104,7 +105,7 @@ int main(int argc, char** argv)
 	std::string test_data_directory;
 	std::vector<std::vector<std::string>> test_file;
 	std::vector<std::string> te_image_files;
-	std::ofstream DataLogStream;
+	std::ofstream data_log_stream;
 
     // timing variables
 	typedef std::chrono::duration<double> d_sec;
@@ -115,18 +116,18 @@ int main(int argc, char** argv)
     std::pair<uint32_t, uint32_t> target_size(45, 100);
  
     //create window to display images
-    dlib::image_window win;
-    dlib::rgb_pixel color;
-    dlib::matrix<dlib::rgb_pixel> rgb_img;
+    //dlib::image_window win;
+    //dlib::rgb_pixel color;
+    //dlib::matrix<dlib::rgb_pixel> rgb_img;
 
     dlib::rand rnd;
     rnd = dlib::rand(time(NULL));
 
     //uint64_t missing_detections = 0;
     //uint64_t false_positives = 0;
-    uint64_t match_count = 0;
-    uint64_t num_gt = 0;
-    double acc = 0.0;
+    //uint64_t match_count = 0;
+    //uint64_t num_gt = 0;
+    //double acc = 0.0;
 
     // ---------------------------------------------------------------------------------------- 
 	if (argc == 1)
@@ -184,13 +185,13 @@ int main(int argc, char** argv)
 		logfileName = logfileName + sdate + "_" + stime + ".txt";
 
 		std::cout << "Log File:              " << (results_save_location + logfileName) << std::endl << std::endl;
-		DataLogStream.open((results_save_location + logfileName), ios::out | ios::app);
+		data_log_stream.open((results_save_location + logfileName), ios::out | ios::app);
 
 		// Add the date and time to the start of the log file
-		DataLogStream << "------------------------------------------------------------------" << std::endl;
-		DataLogStream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
-		DataLogStream << "Platform: " << platform << std::endl;
-		DataLogStream << std::endl;
+		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
+		data_log_stream << "Platform: " << platform << std::endl;
+		data_log_stream << std::endl;
 
 		///////////////////////////////////////////////////////////////////////////////
 		// Step 1: Read in the test images
@@ -226,9 +227,9 @@ int main(int argc, char** argv)
         std::cout << "test input file:       " << test_inputfile << std::endl;
 		std::cout << "Test image sets to parse: " << test_file.size() << std::endl;
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << test_inputfile << std::endl;
-        DataLogStream << "Test image sets to parse: " << test_file.size() << std::endl;
+        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << test_inputfile << std::endl;
+        data_log_stream << "Test image sets to parse: " << test_file.size() << std::endl;
 
 
         std::cout << "Loading test images... ";
@@ -240,7 +241,7 @@ int main(int argc, char** argv)
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
         std::cout << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
-        DataLogStream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
+        data_log_stream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Step 2: Setup the network
@@ -260,8 +261,8 @@ int main(int argc, char** argv)
         std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
         std::cout << test_net << std::endl;
 
-        DataLogStream << test_net << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << test_net << std::endl;
+        data_log_stream << "------------------------------------------------------------------" << std::endl;
 
         // get the details about the loss layer -> the number and names of the classes
         dlib::mmod_options options = dlib::layer<0>(test_net).loss_details().get_options();
@@ -269,42 +270,45 @@ int main(int argc, char** argv)
         std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
 
         std::cout << "num detector windows: " << options.detector_windows.size() << std::endl;
-        DataLogStream << "num detector windows: " << options.detector_windows.size() << std::endl;
+        data_log_stream << "num detector windows: " << options.detector_windows.size() << std::endl;
 
-        std::cout << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
-        DataLogStream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
+        //std::cout << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
+        //data_log_stream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
 
         std::set<std::string> tmp_names;
         for (auto& w : options.detector_windows)
         {
             std::cout << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
-            DataLogStream << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
+            data_log_stream << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
             tmp_names.insert(w.label);
         }
 
         std::vector<std::string> class_names(tmp_names.begin(), tmp_names.end());
         uint32_t num_classes = class_names.size();
-        std::vector<label_stats> test_label_stats(num_classes, label_stats(0, 0, 0, 0));
+        //std::vector<label_stats> test_label_stats(num_classes, label_stats(0, 0, 0, 0));
 
         std::vector<dlib::rgb_pixel> class_color;
         for (idx = 0; idx < num_classes; ++idx)
         {
-            test_label_stats[idx].label = class_names[idx];
+            //test_label_stats[idx].label = class_names[idx];
             class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
         }
 
         std::cout << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
         std::cout << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
 
-        DataLogStream << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
-        DataLogStream << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
-        DataLogStream << std::endl;
+        data_log_stream << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
+        data_log_stream << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
+        data_log_stream << std::endl;
 
 //-----------------------------------------------------------------------------
 //          EVALUATE THE FINAL NETWORK PERFORMANCE
 //-----------------------------------------------------------------------------
         std::cout << std::endl << "Analyzing Test Results..." << std::endl;
 
+        dlib::matrix<double, 1, 6> test_results = run_net_performace(data_log_stream, test_net, test_images, test_labels, class_names, class_color, te_image_files, image_save_location);
+
+/*
         // this matrix will contain the results of the training and testing
 		dlib::matrix<double, 1, 6> test_results = dlib::zeros_matrix<double>(1, 6);
 
@@ -326,11 +330,11 @@ int main(int argc, char** argv)
             std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
             //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
-            DataLogStream << "------------------------------------------------------------------" << std::endl;
-            DataLogStream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            DataLogStream << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
-            DataLogStream << "Classification Time (s): " << elapsed_time.count() << std::endl;
-            //DataLogStream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
+            data_log_stream << "------------------------------------------------------------------" << std::endl;
+            data_log_stream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
+            data_log_stream << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
+            data_log_stream << "Classification Time (s): " << elapsed_time.count() << std::endl;
+            //data_log_stream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
             for (jdx = 0; jdx < num_classes; ++jdx)
             {
@@ -342,11 +346,11 @@ int main(int argc, char** argv)
                 acc = (ls[jdx].count == 0) ? 0.0 : ls[jdx].match_count / (double)ls[jdx].count;
                 std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc;
                 std::cout << ", " << ls[jdx].match_count << ", " << ls[jdx].count << ", " << ls[jdx].false_positives << ", " << ls[jdx].missed_detects << std::endl;
-                DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc;
-                DataLogStream << ", " << ls[jdx].match_count << ", " << ls[jdx].count << ls[jdx].false_positives << ", " << ls[jdx].missed_detects << std::endl;
+                data_log_stream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc;
+                data_log_stream << ", " << ls[jdx].match_count << ", " << ls[jdx].count << ls[jdx].false_positives << ", " << ls[jdx].missed_detects << std::endl;
             }
             std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0,1) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 1) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
+            data_log_stream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 1) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
             if (array_depth < 3)
                 dlib::assign_image(rgb_img, test_images[idx][0]);
@@ -362,7 +366,7 @@ int main(int argc, char** argv)
                 vector<string>::iterator class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
                 overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
 
-                DataLogStream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
+                data_log_stream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
                 std::cout << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
             }
             win.set_image(rgb_img);
@@ -374,77 +378,19 @@ int main(int argc, char** argv)
 
             test_results += tr;
             dlib::sleep(100);
-
             //std::cin.ignore();
-
-/*
-            const auto& layer_output_1 = dlib::layer<1>(test_net).get_output();
-            const float* data_1 = layer_output_1.host();
-
-            //const auto& layer_output_e = dlib::layer<aobj_net_type::num_layers - 1>(test_net);
-            auto op = dlib::layer<20>(test_net).get_pyramid_outer_padding();
-            auto pd = dlib::layer<20>(test_net).get_pyramid_padding();
-
-            std::vector<dlib::rectangle> rects;
-            dlib::matrix<dlib::rgb_pixel> tiled_img;
-            
-            // And tell create_tiled_pyramid to create the pyramid using that pyramid type.
-            dlib::create_tiled_pyramid<pyramid_type>(test_images[idx], tiled_img, rects,
-                dlib::input_layer(test_net).get_pyramid_padding(),
-                dlib::input_layer(test_net).get_pyramid_outer_padding());
-            dlib::image_window winpyr(tiled_img, "Tiled pyramid");
-
-            dlib::matrix<float> network_output = dlib::image_plane(test_net.subnet().get_output(), 0, 0);
-            for (long k = 1; k < test_net.subnet().get_output().k(); ++k)
-                network_output = dlib::max_pointwise(network_output, dlib::image_plane(test_net.subnet().get_output(), 0, k));
-
-            const double network_output_scale = test_images[idx].nc() / (double)network_output.nc();
-            resize_image(network_output_scale, network_output);
-
-            dlib::add_border(network_output, network_output, dlib::input_layer(test_net).get_pyramid_outer_padding());
-
-            win.clear_overlay();
-            win.set_image(dlib::jet(network_output, 0.0, -2.5));
-
-            // Also, overlay network_output on top of the tiled image pyramid and display it.
-            for (long r = 0; r < network_output.nr(); ++r)
-            {
-                for (long c = 0; c < tiled_img.nc(); ++c)
-                {
-                    //dlib::dpoint tmp(c, r);
-                    //tmp = dlib::input_tensor_to_output_tensor(test_net, tmp);
-                    //tmp = dlib::point(network_output_scale*tmp);
-                    //if (get_rect(network_output).contains(tmp))
-                    //{
-                    //    float val = network_output(tmp.y(), tmp.x());
-                    //    // alpha blend the network output pixel with the RGB image to make our
-                    //    // overlay.
-                    //    //dlib::rgb_alpha_pixel p;
-                        dlib::rgb_pixel p;
-                        dlib::assign_pixel(p, dlib::colormap_jet(network_output(r,c), 0.0, -2.5));
-                    //    //p.alpha = 120;
-                        assign_pixel(tiled_img(r, c), dlib::rgb_pixel(0.5*tiled_img(r, c).red + 0.5*p.red, 0.5*tiled_img(r, c).green + 0.5*p.green, 0.5*tiled_img(r, c).blue + 0.5*p.blue));
-                    //}
-                }
-            }
-            // If you look at this image you can see that the objects have bright red blobs on
-            // them.  You will also notice there is a certain scale at which it finds objects.  
-            // They have to be not too big or too small, which is why we have an image pyramid.  
-            // The pyramid allows us to find objects of all scales.
-            dlib::image_window win_pyr_overlay(tiled_img, "Detection scores on image pyramid");
-*/
 
 		}
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
+        data_log_stream << "------------------------------------------------------------------" << std::endl << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
         // output the combined test results
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
         
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
+        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
 
         match_count = 0;
         num_gt = 0;
@@ -454,25 +400,28 @@ int main(int argc, char** argv)
             std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", ";
             std::cout << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << ", " << test_label_stats[jdx].false_positives << ", " << test_label_stats[jdx].missed_detects << std::endl;
 
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", ";
-            DataLogStream << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << ", " << test_label_stats[jdx].false_positives << ", " << test_label_stats[jdx].missed_detects << std::endl;
+            data_log_stream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", ";
+            data_log_stream << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << ", " << test_label_stats[jdx].false_positives << ", " << test_label_stats[jdx].missed_detects << std::endl;
 
             match_count += test_label_stats[jdx].match_count;
             num_gt += test_label_stats[jdx].count;
         }
 
         acc = (num_gt == 0) ? 0.0 : match_count / (double)num_gt;
+*/
 
-        std::cout << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << acc;
+        std::cout << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
         std::cout << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
 
-        DataLogStream << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << acc;
-        DataLogStream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
+        data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+        data_log_stream << "------------------------------------------------------------------" << std::endl;
+
+
 
         std::cout << std::endl << "End of Program." << std::endl;
-        DataLogStream.close();
+        data_log_stream.close();
         std::cin.ignore();
         
 	}
@@ -480,11 +429,11 @@ int main(int argc, char** argv)
 	{
 		std::cout << e.what() << std::endl;
 
-		DataLogStream << std::endl;
-		DataLogStream << "------------------------------------------------------------------" << std::endl;
-		DataLogStream << e.what() << std::endl;
-		DataLogStream << "------------------------------------------------------------------" << std::endl;
-		DataLogStream.close();
+		data_log_stream << std::endl;
+		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream << e.what() << std::endl;
+		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream.close();
 
 		std::cout << "Press Enter to close..." << std::endl;
 		std::cin.ignore();
