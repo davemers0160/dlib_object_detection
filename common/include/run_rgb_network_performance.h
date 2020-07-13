@@ -115,7 +115,7 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
 #endif
 
         //save results to an image
-        std::string image_save_name = image_save_location + "test_img_" + version + num2str(idx, "_%05d.png");
+        //std::string image_save_name = image_save_location + "test_img_" + version + num2str(idx, "_%05d.png");
         //save_png(rgb_img, image_save_name);
 
         test_results += tr;
