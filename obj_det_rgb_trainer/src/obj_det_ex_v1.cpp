@@ -832,6 +832,20 @@ int main(int argc, char** argv)
         data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
         //------------------------------------------------------------------------------------------
+        if (HPC == 1)
+        {
+            std::cout << "-------------------------------------------------------------------------------" << std::endl;
+            std::cout << std::fixed << std::setprecision(4) << training_results(0, 0) << ", " << training_results(0, 3) << ", " << training_results(0, 1) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << ", ";
+            std::cout << std::fixed << std::setprecision(4) << test_results(0, 0) << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+            std::cout << "-------------------------------------------------------------------------------" << std::endl;
+            
+            data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+            data_log_stream << std::fixed << std::setprecision(4) << training_results(0, 0) << ", " << training_results(0, 3) << ", " << training_results(0, 1) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << ", ";
+            data_log_stream << std::fixed << std::setprecision(4) << test_results(0, 0) << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+            data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        }
+
+        //------------------------------------------------------------------------------------------
         std::cout << std::endl << "End of Program." << std::endl;
         data_log_stream.close();
         std::cin.ignore();
