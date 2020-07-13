@@ -32,7 +32,8 @@
 #include "obj_det_dnn.h"
 #include "load_data.h"
 #include "load_oid_data.h"
-#include "eval_net_performance.h"
+#include "run_network_performance.h"
+//#include "eval_net_performance.h"
 //#include "enhanced_array_cropper.h"
 //#include "random_channel_swap.h"
 //#include "enhanced_channel_swap.h"
@@ -98,7 +99,7 @@ void get_platform_control(void)
     net_name = version +  "_final_net.dat";
 }
 
-// ----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
 
 void print_usage(void)
 {
@@ -108,7 +109,7 @@ void print_usage(void)
     std::cout << endl;
 }
 
-// ----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {
@@ -131,7 +132,7 @@ int main(int argc, char** argv)
     std::vector<std::vector<std::string>> training_file;
     std::vector<std::vector<std::string>> test_file;
     std::vector<std::string> tr_image_files, te_image_files;
-    std::ofstream DataLogStream;
+    std::ofstream data_log_stream;
 
     // timing variables
     typedef std::chrono::duration<double> d_sec;
@@ -164,7 +165,7 @@ int main(int argc, char** argv)
 
 #if !defined(DLIB_NO_GUI_SUPPORT)
     //create window to display images
-    dlib::image_window win;
+    //dlib::image_window win;
 #endif
 
     dlib::rand rnd;
@@ -173,7 +174,7 @@ int main(int argc, char** argv)
     // set the learning rate multipliers: 0 means freeze the layers; r1 = learning rate multiplier, r2 = learning rate bias multiplier
     //double r1 = 1.0, r2 = 1.0;
     
-    // ----------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------
    
     if (argc == 1)
     {
@@ -243,21 +244,20 @@ int main(int argc, char** argv)
         //cropper_stats_file = output_save_location + "cr_stats_" + version + "_" + sdate + "_" + stime + ".txt";
 
         std::cout << "Log File:              " << (results_save_location + logfileName) << std::endl << std::endl;
-        DataLogStream.open((results_save_location + logfileName), ios::out | ios::app);
+        data_log_stream.open((results_save_location + logfileName), ios::out | ios::app);
 
         // Add the date and time to the start of the log file
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
-        DataLogStream << "Platform: " << platform << std::endl;
-        DataLogStream << "GPU: { ";
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
+        data_log_stream << "Platform: " << platform << std::endl;
+        data_log_stream << "GPU: { ";
         for (idx = 0; idx < gpu.size(); ++idx)
-            DataLogStream << gpu[idx] << " ";
-        DataLogStream << "}" << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+            data_log_stream << gpu[idx] << " ";
+        data_log_stream << "}" << std::endl << std::endl;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 // Read in the training and testing images
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
         // parse through the supplied training input file
         switch(train_input.second)
@@ -292,14 +292,15 @@ int main(int argc, char** argv)
 
         training_file.erase(training_file.begin());
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "data_directory:        " << train_data_directory << std::endl;
 
         std::cout << train_input.first << std::endl;
         std::cout << "Training image sets to parse: " << training_file.size() << std::endl;
 
-        DataLogStream << train_input.first << std::endl;
-        DataLogStream << "Training image sets to parse: " << training_file.size() << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << train_input.first << std::endl;
+        data_log_stream << "Training image sets to parse: " << training_file.size() << std::endl;
         
         std::cout << "Loading training images... ";
 
@@ -341,9 +342,9 @@ int main(int argc, char** argv)
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
         std::cout << "Loaded " << train_images.size() << " training image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
-        DataLogStream << "Loaded " << train_images.size() << " training image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
+        data_log_stream << "Loaded " << train_images.size() << " training image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl << std::endl;
         
-        //DataLogStream << "the following objects were ignored: " << std::endl << std::endl;
+        //data_log_stream << "the following objects were ignored: " << std::endl << std::endl;
 
         //int num_ignored_train_images = 0;
         //int num_found_train_images = 0;
@@ -355,7 +356,7 @@ int main(int argc, char** argv)
         //        if (train_labels[idx][jdx].ignore == true) 
         //        {
         //            ++num_ignored_train_images;
-        //            DataLogStream << training_file[idx][1] << " " << training_file[idx][6] << std::endl;
+        //            data_log_stream << training_file[idx][1] << " " << training_file[idx][6] << std::endl;
         //        }
         //        else 
         //        {
@@ -366,10 +367,10 @@ int main(int argc, char** argv)
 
         //std::cout << "Number of Found Train Objects: " << num_found_train_images << std::endl;
         //std::cout << "Number of Ignored Train Objects : " << num_ignored_train_images << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+        //std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        //DataLogStream << "Number of Found Train Objects: " << num_found_train_images << std::endl;
-        //DataLogStream << "Number of Ignored Train Objects: " << num_ignored_train_images << std::endl<<std::endl;
+        //data_log_stream << "Number of Found Train Objects: " << num_found_train_images << std::endl;
+        //data_log_stream << "Number of Ignored Train Objects: " << num_ignored_train_images << std::endl<<std::endl;
 
         // for debugging to view the images
         //for (idx = 0; idx < training_file.size(); ++idx)
@@ -391,7 +392,7 @@ int main(int argc, char** argv)
         //}
 
 
-        //-------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
         // parse through the supplied test input file
         switch (test_input.second)
         {
@@ -425,14 +426,14 @@ int main(int argc, char** argv)
 #endif
 
         test_file.erase(test_file.begin());
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "data_directory:        " << test_data_directory << std::endl;
         std::cout << test_input.first << std::endl;
         std::cout << "Test image sets to parse: " << test_file.size() << std::endl;
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << test_input.first << std::endl;
-        DataLogStream << "Test image sets to parse: " << test_file.size() << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << test_input.first << std::endl;
+        data_log_stream << "Test image sets to parse: " << test_file.size() << std::endl;
        
         std::cout << "Loading test images... ";
 
@@ -452,9 +453,9 @@ int main(int argc, char** argv)
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
         std::cout << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
-        DataLogStream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
+        data_log_stream << "Loaded " << test_images.size() << " test image sets in " << elapsed_time.count() / 60 << " minutes." << std::endl;
         
-        //DataLogStream << "the following objects were ignored: " << std::endl << std::endl;
+        //data_log_stream << "the following objects were ignored: " << std::endl << std::endl;
 
         //for (int idx = 0; idx < test_labels.size(); ++idx) 
         //{
@@ -463,7 +464,7 @@ int main(int argc, char** argv)
         //        if (test_labels[idx][jdx].ignore == true) 
         //        {
         //            ++num_ignored_test_images;
-        //            DataLogStream << test_file[idx][1] << " " << test_file[idx][6] << std::endl;
+        //            data_log_stream << test_file[idx][1] << " " << test_file[idx][6] << std::endl;
         //        }
         //        else 
         //        {
@@ -474,13 +475,13 @@ int main(int argc, char** argv)
 
         //std::cout << "Number of Found Test Objects : " << num_found_test_images << std::endl;
         //std::cout << "Number of Ignored Test Objects : " << num_ignored_test_images << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+        //std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        //DataLogStream << "Number of Found Test Objects : " << num_found_test_images << std::endl;
-        //DataLogStream << "Number of Ignored Test Objects: " << num_ignored_test_images << std::endl << std::endl;
-        //DataLogStream << "------------------------------------------------------------------" << std::endl<<std::endl;
+        //data_log_stream << "Number of Found Test Objects : " << num_found_test_images << std::endl;
+        //data_log_stream << "Number of Ignored Test Objects: " << num_ignored_test_images << std::endl << std::endl;
+        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl<<std::endl;
 
-        // ------------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------------------------
 
         // for debugging to view the images
         //for (idx = 0; idx < test_images.size(); ++idx)
@@ -501,9 +502,9 @@ int main(int argc, char** argv)
         //    //dlib::sleep(800);
         //}
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 // Setup the network
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
         // this sets th GPUs to use algorithms that are smaller in memory but may take a little longer to execute
         dlib::set_dnn_prefer_smallest_algorithms();
@@ -523,21 +524,21 @@ int main(int argc, char** argv)
         options.truth_match_iou_threshold = 0.40;
         options.overlaps_nms = dlib::test_box_overlap(0.4, 1.0);
 
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << std::endl << "-------------------------------------------------------------------------------" << std::endl;
 
         std::cout << "num detector windows: " << options.detector_windows.size() << std::endl;
-        DataLogStream << "num detector windows: " << options.detector_windows.size() << std::endl;
+        data_log_stream << "num detector windows: " << options.detector_windows.size() << std::endl;
 
         std::cout << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
-        DataLogStream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
+        data_log_stream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
 
         std::set<std::string> tmp_names;
 
         for (auto& w : options.detector_windows)
         {
             std::cout << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
-            DataLogStream << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
+            data_log_stream << "detector window (w x h): " << w.label << " - " << w.width << " x " << w.height << std::endl;
             tmp_names.insert(w.label);
         }
         
@@ -553,12 +554,12 @@ int main(int argc, char** argv)
         std::cout << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
         std::cout << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
 
-        DataLogStream << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
-        DataLogStream << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
-        DataLogStream << std::endl << "------------------------------------------------------------------"  << std::endl;
+        data_log_stream << "overlap NMS IOU thresh:             " << options.overlaps_nms.get_iou_thresh() << std::endl;
+        data_log_stream << "overlap NMS percent covered thresh: " << options.overlaps_nms.get_percent_covered_thresh() << std::endl;
+        data_log_stream << std::endl << "-------------------------------------------------------------------------------"  << std::endl;
 
 
-        // ------------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------------------------
         /*
         for (idx = 0; idx < train_images.size(); ++idx)
         {
@@ -575,7 +576,7 @@ int main(int argc, char** argv)
             std::cin.ignore();
         }
         */
-        // ------------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------------------------
 
 
         // Now we are ready to create our network and trainer.
@@ -622,33 +623,33 @@ int main(int argc, char** argv)
         //cropper.set_stats_filename(cropper_stats_file);
 
         // display a few hits and also save them to the log file for later analysis
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Crop count: " << ci.crop_num << std::endl;
-        DataLogStream << "Crop count: " << ci.crop_num << std::endl;
+        data_log_stream << "Crop count: " << ci.crop_num << std::endl;
 
         // show all of the cropper settings
         std::cout << cropper << std::endl;
-        DataLogStream << cropper << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << cropper << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
         // show all of the trainer settings
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << trainer << std::endl;
-        DataLogStream << trainer << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << trainer << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
         // show the network to verify that it looks correct
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Net Name: " << net_name << std::endl;
         std::cout << net << std::endl;
 
-        DataLogStream << "Net Name: " << net_name << std::endl;
-        DataLogStream << net << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Net Name: " << net_name << std::endl;
+        data_log_stream << net << std::endl;
+        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 // TRAINING START
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
         // these two matrices will contain the results of the training and testing
         dlib::matrix<double, 1, 6> training_results = dlib::zeros_matrix<double>(1, 6);
@@ -658,7 +659,7 @@ int main(int argc, char** argv)
         
         uint64_t test_step_count = 2000;
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Starting Training..." << std::endl;
         start_time = chrono::system_clock::now();
 
@@ -747,7 +748,7 @@ int main(int argc, char** argv)
                     {
                     v_win[idx].add_overlay(dnn_labels[jdx].rect, dlib::rgb_pixel(255, 0, 0));
                     //draw_rectangle(tmp_img, dnn_labels[jdx].rect, dlib::rgb_pixel(255, 0, 0), 2);
-                    //DataLogStream << "Detect Confidence Level (" << dnn_test_labels[idx][jdx].label << "): " << dnn_test_labels[idx][jdx].detection_confidence << std::endl;
+                    //data_log_stream << "Detect Confidence Level (" << dnn_test_labels[idx][jdx].label << "): " << dnn_test_labels[idx][jdx].detection_confidence << std::endl;
                     //std::cout << "Detect Confidence Level (" << dnn_test_labels[idx][jdx].label << "): " << dnn_test_labels[idx][jdx].detection_confidence << std::endl;
                     }
                     
@@ -769,13 +770,13 @@ int main(int argc, char** argv)
 
                 test_results(0, 0) = test_results(0, 0) / (double)test_file.size();
 
-                std::cout << "------------------------------------------------------------------" << std::endl;
+                std::cout << "-------------------------------------------------------------------------------" << std::endl;
                 std::cout << "Results (DA, CH, FP, MD): " << std::fixed << std::setprecision(4) << test_results(0, 0) << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-                std::cout << "------------------------------------------------------------------" << std::endl;
+                std::cout << "-------------------------------------------------------------------------------" << std::endl;
 */                
 
-                DataLogStream << std::setw(6) << std::setfill('0') << one_step_calls << ", " << std::fixed << std::setprecision(9) << trainer.get_learning_rate() << ", ";
-                DataLogStream << std::setprecision(5) << trainer.get_average_loss() << ", " << trainer.get_average_test_loss() << std::endl;
+                data_log_stream << std::setw(6) << std::setfill('0') << one_step_calls << ", " << std::fixed << std::setprecision(9) << trainer.get_learning_rate() << ", ";
+                data_log_stream << std::setprecision(5) << trainer.get_average_loss() << ", " << trainer.get_average_test_loss() << std::endl;
 
             }
 
@@ -798,9 +799,9 @@ int main(int argc, char** argv)
         }   // end of while(stop<0)
 
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 // TRAINING STOP
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
         stop_time = chrono::system_clock::now();
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
@@ -808,209 +809,57 @@ int main(int argc, char** argv)
         // wait for training threads to stop
         trainer.get_net();
 
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Elapsed Training Time: " << elapsed_time.count() / 3600 << " hours" << std::endl;
         std::cout << "Stop Code: " << stop_codes[stop] << std::endl;
         std::cout << "Final Average Loss: " << trainer.get_average_loss() << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Elapsed Training Time: " << elapsed_time.count() / 3600 << " hours" << std::endl;
-        DataLogStream << "Stop Code: " << stop_codes[stop] << std::endl;
-        DataLogStream << "Final Average Loss: " << trainer.get_average_loss() << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Elapsed Training Time: " << elapsed_time.count() / 3600 << " hours" << std::endl;
+        data_log_stream << "Stop Code: " << stop_codes[stop] << std::endl;
+        data_log_stream << "Final Average Loss: " << trainer.get_average_loss() << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
         // Save the network to disk
         net.clean();
         dlib::serialize(sync_save_location + net_name) << net;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 //  EVALUATE THE FINAL NETWORK PERFORMANCE
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
         // load the network from the saved file
         anet_type test_net;
 
-        std::cout << std::endl << "Loading " << (sync_save_location + net_name) << std::endl;
+        std::cout << "Loading " << (sync_save_location + net_name) << std::endl << std::endl;
         dlib::deserialize(sync_save_location + net_name) >> test_net;
 
-
+        //----------------------------------------------------------------------------------------------------
         // In this section we want to evaluate the performance of the network against the training data
         // this should be displayed and then saved to the log file
-        // - This can also include displaying the input image along with the ground truth bounding box, name and dnn results
-        
-        //---------------------------------------------------------------------------------------
+        // - This can also include displaying the input image along with the ground truth bounding box, name and dnn results        
         std::cout << "Analyzing Training Results..." << std::endl;
 
-        training_results = dlib::zeros_matrix<double>(1, 6);
+        //training_results = dlib::zeros_matrix<double>(1, 6);
+        training_results = run_net_performace(data_log_stream, test_net, train_images, train_labels, class_names, class_color, tr_image_files, image_save_location);
+        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        for (idx = 0; idx < train_images.size(); ++idx)
-        {
-
-            std::vector<dlib::mmod_rect> dnn_labels;
-            std::vector<label_stats> ls(num_classes, label_stats(0, 0));
-
-            // get the rough classification time per image
-            start_time = chrono::system_clock::now();
-            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, train_images[idx], train_labels[idx], dnn_labels, target_size.first, fda_test_box_overlap(0.4, 1.0), class_names, ls);
-            stop_time = chrono::system_clock::now();
-
-            elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
-
-            std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << tr_image_files[idx] << std::endl;
-            std::cout << "Image Size (h x w): " << train_images[idx][0].nr() << "x" << train_images[idx][0].nc() << std::endl;
-            std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
-            //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            DataLogStream << "------------------------------------------------------------------" << std::endl;
-            DataLogStream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << tr_image_files[idx] << std::endl;
-            DataLogStream << "Image Size (h x w): " << train_images[idx][0].nr() << "x" << train_images[idx][0].nc() << std::endl;
-            DataLogStream << "Classification Time (s): " << elapsed_time.count() << std::endl;
-            //DataLogStream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            for (jdx=0; jdx< num_classes; ++jdx)
-            {
-                train_label_stats[jdx].count += ls[jdx].count;
-                train_label_stats[jdx].match_count += ls[jdx].match_count;
-
-                double acc  = (ls[jdx].count == 0) ? 0.0 : ls[jdx].match_count / (double)ls[jdx].count;
-                std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count << std::endl;
-                DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count << std::endl;
-            }
-            std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            if (array_depth < 3)
-                dlib::assign_image(rgb_img, train_images[idx][0]);
-            else
-                merge_channels(train_images[idx], rgb_img);
-
-#if !defined(DLIB_NO_GUI_SUPPORT)
-            win.clear_overlay();
-
-            //overlay the dnn detections on the image
-            for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
-            {
-                auto& class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
-                overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
-
-                DataLogStream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
-                std::cout << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
-            }
-            win.set_image(rgb_img);
-            std::cin.ignore();
-#endif
-
-            //save results to an image
-            std::string image_save_name = image_save_location + "train_save_image_" + version + num2str(idx, "_%05d.png");
-            //save_png(rgb_img, image_save_name);
-
-            training_results += tr;
-            //dlib::sleep(50);
-
-
-        }
-
-        DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
-
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "Training Results (detction_accuracy, correct_hits, false_positives, missing_detections): " << std::fixed << std::setprecision(4) << training_results(0, 0) / (double)training_file.size() << ", " << training_results(0, 3) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
-
+        //----------------------------------------------------------------------------------------------------
         // In this section we want to evaluate the performance of the network against the test data
         // this should be displayed and then saved to the log file
         // - This can also include displaying the input image along with the ground truth bounding box, name and dnn results
         std::cout << "Analyzing Test Results..." << std::endl;
 
-        // testResults = eval_all_net_performance(test_net, test_images, test_labels, dnn_test_labels, min_target_size);
-        test_results = dlib::zeros_matrix<double>(1, 6);
-        //dnn_test_labels.clear();
+        //test_results = dlib::zeros_matrix<double>(1, 6);
+        test_results = run_net_performace(data_log_stream, test_net, test_images, test_labels, class_names, class_color, te_image_files, image_save_location);
+        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        for (idx = 0; idx < test_images.size(); ++idx)
-        {
-
-            std::vector<dlib::mmod_rect> dnn_labels;
-            std::vector<label_stats> ls(num_classes, label_stats(0, 0));
-
-            // get the rough classification time per image
-            start_time = chrono::system_clock::now();
-            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, test_images[idx], test_labels[idx], dnn_labels, target_size.first, fda_test_box_overlap(0.4, 1.0), class_names, ls);
-            stop_time = chrono::system_clock::now();
-
-            elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
-
-            std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            std::cout << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
-            std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
-            //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            DataLogStream << "------------------------------------------------------------------" << std::endl;
-            DataLogStream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
-            DataLogStream << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
-            DataLogStream << "Classification Time (s): " << elapsed_time.count() << std::endl;
-            //DataLogStream << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            for (jdx = 0; jdx < num_classes; ++jdx)
-            {
-                test_label_stats[jdx].count += ls[jdx].count;
-                test_label_stats[jdx].match_count += ls[jdx].match_count; 
-                
-                double acc = (ls[jdx].count == 0) ? 0.0 : ls[jdx].match_count / (double)ls[jdx].count;
-                std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count << std::endl;
-                DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << ls[jdx].match_count << ", " << ls[jdx].count  << std::endl;
-            }
-            std::cout << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
-
-            if (array_depth < 3)
-                dlib::assign_image(rgb_img, test_images[idx][0]);
-            else
-                merge_channels(test_images[idx], rgb_img);
-
-#if !defined(DLIB_NO_GUI_SUPPORT)
-            win.clear_overlay();
-
-            //overlay the dnn detections on the image
-            for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
-            {
-                auto& class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
-                overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
-
-                DataLogStream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
-                std::cout << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
-            }
-            win.set_image(rgb_img);
-            std::cin.ignore();
-#endif
-
-            //save results to an image
-            std::string image_save_name = image_save_location + "test_img_" + version + num2str(idx, "_%05d.png");
-            //save_png(rgb_img, image_save_name);
-
-            test_results += tr;
-            //dlib::sleep(50);
-
-        }
-        DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+        //std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
 /*
-        // output the test results
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "Testing Results (detction_accuracy, correct_hits, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
-
-        // save the results to the log file
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Training Results (detction_accuracy, correct_hits, false_positives, missing_detections): " << std::fixed << std::setprecision(4) << training_results(0, 0) / (double)training_file.size() << ", " << training_results(0, 3) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
-        DataLogStream << "Testing Results (detction_accuracy, correct_hits, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-*/
-
         // output the training results
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "class_name, accuracy, correct_detects, groundtruth" << std::endl;
         for (jdx = 0; jdx < num_classes; ++jdx)
         {
@@ -1018,11 +867,11 @@ int main(int argc, char** argv)
             std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << train_label_stats[jdx].match_count << ", " << train_label_stats[jdx].count << std::endl;
         }
         std::cout << "Training Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << training_results(0, 0) / (double)training_file.size() << ", " << training_results(0, 3) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
 
         // output the test results
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "class_name, accuracy, correct_detects, groundtruth" << std::endl;
         for (jdx = 0; jdx < num_classes; ++jdx)
         {
@@ -1030,32 +879,32 @@ int main(int argc, char** argv)
             std::cout << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << std::endl;
         }
         std::cout << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
+*/
+        // output the final results to the std out
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
+        std::cout << "Training Results (detction_accuracy, correct_hits, false_positives, missing_detections): " << std::fixed << std::setprecision(4) << training_results(0, 0);
+        std::cout << ", " << training_results(0, 3) << ", " << training_results(0, 1) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
+        std::cout << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
+        std::cout << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
 
         // save the results to the log file
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Training Results (detction_accuracy, correct_detects, false_positives, missing_detections): " << std::fixed << std::setprecision(4) << training_results(0, 0) / (double)training_file.size() << ", " << training_results(0, 3) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
-        DataLogStream << "class_name, detction_accuracy, correct_detects, groundtruth" << std::endl;
-        for (jdx = 0; jdx < num_classes; ++jdx)
-        {
-            double acc = (train_label_stats[jdx].count == 0) ? 0.0 : train_label_stats[jdx].match_count / (double)train_label_stats[jdx].count;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc<< ", " << train_label_stats[jdx].match_count << ", " << train_label_stats[jdx].count << std::endl;
-        }
-        DataLogStream << "------------------------------------------------------------------" << std::endl << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Training Results (detction_accuracy, correct_detects, false_positives, missing_detections): " << std::fixed << std::setprecision(4) << training_results(0, 0);
+        data_log_stream << ", " << training_results(0, 3) << ", " << training_results(0, 1) << ", " << training_results(0, 4) << ", " << training_results(0, 5) << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0) / (double)test_file.size() << ", " << test_results(0, 3) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        DataLogStream << "class_name, detction_accuracy, correct_detects, groundtruth" << std::endl;
-        for (jdx = 0; jdx < num_classes; ++jdx)
-        {
-            double acc = (test_label_stats[jdx].count == 0) ? 0.0 : test_label_stats[jdx].match_count / (double)test_label_stats[jdx].count;
-            DataLogStream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << std::endl;
-        }
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
+        data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
-        std::cout << "End of Program." << std::endl;
-        DataLogStream.close();
+        std::cout << std::endl << "End of Program." << std::endl;
+        data_log_stream.close();
         std::cin.ignore();
         
     }
@@ -1063,11 +912,11 @@ int main(int argc, char** argv)
     {
         std::cout << e.what() << std::endl;
 
-        DataLogStream << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream << e.what() << std::endl;
-        DataLogStream << "------------------------------------------------------------------" << std::endl;
-        DataLogStream.close();
+        data_log_stream << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << e.what() << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream.close();
 
         std::cout << "Press Enter to close..." << std::endl;
         std::cin.ignore();

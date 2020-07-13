@@ -71,13 +71,13 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
 
         elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
         std::cout << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
         std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
         //std::cout << "Results: " << std::fixed << std::setprecision(4) << tr(0, 0) << ", " << tr(0, 3) << ", " << tr(0, 4) << ", " << tr(0, 5) << std::endl;
 
-        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
         data_log_stream << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
         data_log_stream << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
         data_log_stream << "Classification Time (s): " << elapsed_time.count() << std::endl;
@@ -129,14 +129,14 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
 
     }
 
-    data_log_stream << "------------------------------------------------------------------" << std::endl << std::endl;
-    std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+    data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
+    std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
     // output the combined test results
-    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------------------------------------------" << std::endl;
     std::cout << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
 
-    data_log_stream << "------------------------------------------------------------------" << std::endl;
+    data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
     data_log_stream << "class_name, detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections" << std::endl;
 
     match_count = 0;
@@ -153,6 +153,9 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
         match_count += test_label_stats[jdx].match_count;
         num_gt += test_label_stats[jdx].count;
     }
+
+    std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
+    data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
     test_results(0, 0) = (num_gt == 0) ? 0.0 : match_count / (double)num_gt;
 

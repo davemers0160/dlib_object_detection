@@ -815,7 +815,7 @@ int main(int argc, char** argv)
 
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
-            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, train_images[idx], train_labels[idx], dnn_labels, target_size.first, fda_test_box_overlap(0.4, 1.0), class_names, ls);
+            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, train_images[idx], train_labels[idx], dnn_labels, fda_test_box_overlap(0.4, 1.0), class_names, ls);
             stop_time = chrono::system_clock::now();
 
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
@@ -894,7 +894,7 @@ int main(int argc, char** argv)
 
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
-            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, test_images[idx], test_labels[idx], dnn_labels, target_size.first, fda_test_box_overlap(0.4, 1.0), class_names, ls);
+            dlib::matrix<double, 1, 6> tr = eval_net_performance(test_net, test_images[idx], test_labels[idx], dnn_labels, fda_test_box_overlap(0.4, 1.0), class_names, ls);
             stop_time = chrono::system_clock::now();
 
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);

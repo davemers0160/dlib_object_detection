@@ -15,13 +15,13 @@ dc_3_v10_20_20_100_
 #4 training data file: this is the file that contains the list of associated training data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
 #D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 0
-D:/Projects/object_detection_data/dc/train/dc_train_third_input.txt, 0
+D:/Projects/object_detection_data/dc/train/dc_train_third_input_v2.txt, 0
 #D:/Projects/object_detection_data/open_images/test-box-annotations-bbox.csv, 1
 
 #5 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
 #D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 0
-D:/Projects/object_detection_data/dc/test/dc_test_full_input.txt, 0
+D:/Projects/object_detection_data/dc/test/dc_test_full_input_v2.txt, 0
 
 #6 training crop info: number of crops, crop_height, crop_width, max_rot_angle
 40, 100, 100, 15.0
