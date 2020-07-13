@@ -120,7 +120,7 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
 
         test_results += tr;
         dlib::sleep(100);
-        //std::cin.ignore();
+        std::cin.ignore();
 
     }
 
