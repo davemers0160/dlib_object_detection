@@ -841,9 +841,7 @@ int main(int argc, char** argv)
         // - This can also include displaying the input image along with the ground truth bounding box, name and dnn results        
         std::cout << "Analyzing Training Results..." << std::endl;
 
-        //training_results = dlib::zeros_matrix<double>(1, 6);
         training_results = run_net_performace(data_log_stream, test_net, train_images, train_labels, class_names, class_color, tr_image_files, image_save_location);
-        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
         //----------------------------------------------------------------------------------------------------
         // In this section we want to evaluate the performance of the network against the test data
@@ -851,11 +849,7 @@ int main(int argc, char** argv)
         // - This can also include displaying the input image along with the ground truth bounding box, name and dnn results
         std::cout << "Analyzing Test Results..." << std::endl;
 
-        //test_results = dlib::zeros_matrix<double>(1, 6);
         test_results = run_net_performace(data_log_stream, test_net, test_images, test_labels, class_names, class_color, te_image_files, image_save_location);
-        //data_log_stream << "-------------------------------------------------------------------------------" << std::endl << std::endl;
-
-        //std::cout << "-------------------------------------------------------------------------------" << std::endl << std::endl;
 
 /*
         // output the training results
@@ -903,6 +897,7 @@ int main(int argc, char** argv)
         data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
         data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
+        //------------------------------------------------------------------------------------------
         std::cout << std::endl << "End of Program." << std::endl;
         data_log_stream.close();
         std::cin.ignore();
