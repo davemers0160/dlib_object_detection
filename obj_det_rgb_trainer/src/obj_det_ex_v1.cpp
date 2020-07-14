@@ -828,7 +828,7 @@ int main(int argc, char** argv)
 
         data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
         data_log_stream << "Testing Results (detction_accuracy, correct_detects, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
-        data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
+        data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
         data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
         //------------------------------------------------------------------------------------------
