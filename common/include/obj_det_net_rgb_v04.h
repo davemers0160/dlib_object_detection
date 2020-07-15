@@ -144,7 +144,7 @@ using anet_type = dlib::loss_mmod<con9<1,
 // ----------------------------------------------------------------------------------------
 
 template <typename net_type>
-net_type config_net(dlib::mmod_options options, std::array<float, array_depth> avg_color, std::vector<uint32_t> params)
+net_type config_net(dlib::mmod_options options, std::vector<float> avg_color, std::vector<uint32_t> params)
 {
 
     net_type net = net_type(options, dlib::num_con_outputs(params[0]),
