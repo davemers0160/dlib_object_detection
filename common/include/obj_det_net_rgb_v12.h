@@ -52,6 +52,10 @@ template<typename SUBNET> using mp33 = dlib::max_pool<3, 3, 3, 3, SUBNET>;
 template<typename SUBNET> using mp72 = dlib::max_pool<7, 7, 2, 2, SUBNET>;
 template<typename SUBNET> using mp92 = dlib::max_pool<9, 9, 2, 2, SUBNET>;
 
+template<typename SUBNET> using ap32 = dlib::avg_pool<3, 3, 2, 2, SUBNET>;
+template<typename SUBNET> using ap52 = dlib::avg_pool<5, 5, 2, 2, SUBNET>;
+template<typename SUBNET> using ap72 = dlib::avg_pool<7, 7, 2, 2, SUBNET>;
+template<typename SUBNET> using ap92 = dlib::avg_pool<9, 9, 2, 2, SUBNET>;
 
 template <int N1, int N2, int N3, typename SUBNET> using blk3 = dlib::bn_con<con1<N1, dlib::prelu<dlib::bn_con<con3<N2, dlib::prelu<dlib::bn_con<con1<N3, SUBNET>>>>>>>>;
 template <int N1, int N2, int N3, typename SUBNET> using ablk3 = dlib::affine<con1<N1, dlib::prelu<dlib::affine<con3<N2, dlib::prelu<dlib::affine<con1<N3, SUBNET>>>>>>>>;
@@ -61,6 +65,10 @@ template <int N1, int N2, int N3, typename SUBNET> using ablk5 = dlib::affine<co
 
 template <int N, typename SUBNET> using cbp3_blk = dlib::prelu<dlib::bn_con<con3<N, SUBNET>>>;
 template <int N, typename SUBNET> using cbp5_blk = dlib::prelu<dlib::bn_con<con5<N, SUBNET>>>;
+
+template <int N1, int N2, typename SUBNET> using cbp313_blk = dlib::prelu<dlib::bn_con<con31<N1, con13<N2, SUBNET>>>>;
+template <int N1, int N2, typename SUBNET> using cbp515_blk = dlib::prelu<dlib::bn_con<con51<N1, con15<N2, SUBNET>>>>;
+
 
 template <int N, typename SUBNET> using acbp3_blk = dlib::prelu<dlib::affine<con3<N, SUBNET>>>;
 template <int N, typename SUBNET> using acbp5_blk = dlib::prelu<dlib::affine<con5<N, SUBNET>>>;
@@ -90,7 +98,7 @@ template <int N1, int N2, int N3, typename SUBNET> using adownsampler = dlib::re
 template <int N1, typename SUBNET> using rcon3 = dlib::relu<dlib::bn_con<con3<N1, SUBNET>>>;
 template <int N1, typename SUBNET> using arcon3 = dlib::relu<dlib::affine<con3<N1, SUBNET>>>; 
 
-template <int N1, typename SUBNET> using rcon5 = dlib::relu<dlib::bn_con<con5<N1,SUBNET>>>;
+template <int N1, typename SUBNET> using rcon5 = dlib::relu<dlib::bn_con<con5<N1, SUBNET>>>;
 template <int N1, typename SUBNET> using arcon5 = dlib::relu<dlib::affine<con5<N1, SUBNET>>>;
 
 /*
@@ -112,21 +120,25 @@ input[4] -> downsampler -> rcon3 -> rcon3 -> rcon3 -> con6
 
 using net_type = dlib::loss_mmod<con9<1,
 
-    res_blk3<128,128,64, cbp3_blk<128,
-    con2d<64, res_blk3<64,64,32, cbp3_blk<64,
-    con2d<32, res_blk5<32,32,16, cbp5_blk<32,
+    dlib::prelu<dlib::bn_con<con71<256, con17<256,
+    dlib::prelu<dlib::bn_con<con51<128, con15<128,
 
-    mp33<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
-    >>> >>> >> >>;
+    con2d<128, dlib::prelu<dlib::bn_con<con31<64, con13<64,
+    con2d<64, dlib::prelu<dlib::bn_con<con51<32, con15<32,
+
+    ap72<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
+    >>>>> >>>>> >>>> >>>> >>;
 
 using anet_type = dlib::loss_mmod<con9<1,
 
-    ares_blk3<128, 128, 64, acbp3_blk<128,
-    con2d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
-    con2d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
+    dlib::prelu<dlib::affine<con71<256, con17<256,
+    dlib::prelu<dlib::affine<con51<128, con15<128,
 
-    mp33<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
-    >>> >>> >> >>;
+    con2d<128, dlib::prelu<dlib::affine<con31<64, con13<64,
+    con2d<64, dlib::prelu<dlib::affine<con51<32, con15<32,
+
+    ap72<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
+    >>>>> >>>>> >>>> >>>> >>;
 
 // ----------------------------------------------------------------------------------------
 // Configuration function
@@ -147,10 +159,6 @@ net_type config_net(dlib::mmod_options options, std::vector<float> avg_color, st
         dlib::num_con_outputs(params[8]),
         dlib::num_con_outputs(params[9]),
         dlib::num_con_outputs(params[10]),
-        dlib::num_con_outputs(params[11]),
-        dlib::num_con_outputs(params[12]),
-        dlib::num_con_outputs(params[13]),
-        dlib::num_con_outputs(params[14]),
         dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>(avg_color[0], avg_color[1], avg_color[2])
     );
 
