@@ -26,7 +26,7 @@
 
 // Net Version
 //#include "yj_net_v10.h"
-#include "obj_det_net_rgb_v12.h"
+#include "obj_det_net_rgb_v04.h"
 //#include "tfd_net_v04.h"
 
 #include "obj_det_dnn.h"
@@ -494,8 +494,8 @@ int main(int argc, char** argv)
         std::cout << "num detector windows: " << options.detector_windows.size() << std::endl;
         data_log_stream << "num detector windows: " << options.detector_windows.size() << std::endl;
 
-        std::cout << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
-        data_log_stream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
+        std::cout << "bounding box configuration (min, max, overlap): " << target_size.first << ", " << target_size.second << ", " << min_window_overlap << std::endl;;
+        data_log_stream << "bounding box configuration (min, max, overlap): " << target_size.first << ", " << target_size.second << ", " << min_window_overlap << std::endl;;
 
         std::set<std::string> tmp_names;
 
@@ -632,7 +632,7 @@ int main(int argc, char** argv)
                 // apply some noise to the image
                 for (auto&& tc : train_batch_samples)
                 {
-                    apply_rgb_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
+                    apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
                 }
 
 #if defined(_DEBUG)

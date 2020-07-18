@@ -530,8 +530,8 @@ int main(int argc, char** argv)
         std::cout << "num detector windows: " << options.detector_windows.size() << std::endl;
         data_log_stream << "num detector windows: " << options.detector_windows.size() << std::endl;
 
-        std::cout << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
-        data_log_stream << "bounding box configuration (min, max): " << target_size.first << ", " << target_size.second << std::endl;;
+        std::cout << "bounding box configuration (min, max, overlap): " << target_size.first << ", " << target_size.second << ", " << min_window_overlap << std::endl;;
+        data_log_stream << "bounding box configuration (min, max, overlap): " << target_size.first << ", " << target_size.second << ", " << min_window_overlap << std::endl;;
 
         std::set<std::string> tmp_names;
 

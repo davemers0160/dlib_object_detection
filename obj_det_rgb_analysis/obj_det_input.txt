@@ -4,7 +4,7 @@
 
 #1 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
-D:/Projects/object_detection_data/dc/test/dc_test_full_input_v2.txt, 0
+D:/Projects/object_detection_data/dc/test/dc_test_full_input_v3.txt, 0
 #/home/owner/Projects/object_detection_data/FaceDetection/thermal_face_test_green_v1.txt, 0
 
 #2 network: this tells the code which trained network file to load
@@ -14,7 +14,7 @@ D:/Projects/robot/obj_det/nets/dc3_rgb_v10_40_40_100_HPC_final_net.dat
 #/home/owner/Projects/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat
 
 #3 version name: this is used as the prepend to all files, must end with "_"
-dc_v10_
+dc_v10_v2_
 
 #4 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/dc_v10/
