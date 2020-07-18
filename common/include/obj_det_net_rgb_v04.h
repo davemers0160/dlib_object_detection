@@ -131,7 +131,7 @@ using anet_type = dlib::loss_mmod<con9<1,
     dlib::relu<dlib::affine<con51<128,con15<128,
 
     dlib::relu<dlib::affine<con5d<128, 
-     dlib::relu<dlib::affine<con71<64,con17<64,
+    dlib::relu<dlib::affine<con71<64,con17<64,
    
     dlib::relu<dlib::affine<con5d<64, 
     dlib::relu<dlib::affine<con91<32,con19<32,

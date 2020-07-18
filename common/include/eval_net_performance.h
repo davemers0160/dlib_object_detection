@@ -188,6 +188,7 @@ inline uint64_t get_number_of_truth_hits(
                 if (ln.compare(ground_truth_boxes[idx].label) == 0)
                 {
                     ++ls[label_index].count;
+                    ++ls[label_index].missed_detects;
                     break;
                 }
 
@@ -206,16 +207,12 @@ inline uint64_t get_number_of_truth_hits(
         label_index = 0;
         bool found_match = false;
        
-        //ls.label[label_index] = ground_truth_boxes[idx].label;
-
         for (auto& ln : label_names)
         {
             
             if (ln.compare(ground_truth_boxes[idx].label) == 0)
             {
-                //ls.count[label_index] += 1;
                 ++ls[label_index].count;
-                //ls.label[label_index] = ground_truth_boxes[idx].label;
                 break;
             }
 
@@ -263,14 +260,24 @@ inline uint64_t get_number_of_truth_hits(
         }
     }
 
-    //for (idx = 0; idx < boxes.size(); ++idx)
-    //{
-    //    // only out put boxes if they match a truth box or are not ignored.
-    //    if (used[idx] || !fda_overlaps_any_box(overlap_tester, ignore, boxes[idx].rect))
-    //    {
-    //        all_dets.push_back(std::make_pair(boxes[idx].detection_confidence, used[idx]));
-    //    }
-    //}
+    // run this check for any detects that don't match anything
+    for (idx = 0; idx < boxes.size(); ++idx)
+    {
+        if (used[idx] == false)
+        {
+            for (jdx=0; jdx<label_names.size(); ++jdx)
+            {
+
+                if (label_names[jdx].compare(boxes[idx].label) == 0)
+                {
+                    ++ls[jdx].false_positives;
+                    break;
+                }
+
+            }
+        }
+
+    }
 
     return count;
 }   // end of get_number_of_truth_hits
