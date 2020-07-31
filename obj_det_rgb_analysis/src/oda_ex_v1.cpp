@@ -27,7 +27,7 @@
 #include "overlay_bounding_box.h"
 
 // Net Version
-#include "obj_det_net_rgb_v04.h"
+#include "obj_det_net_rgb_v10.h"
 #include "load_data.h"
 #include "run_rgb_network_performance.h"
 

@@ -53,6 +53,7 @@
 //#include "array_image_operations.h"
 //#include "random_array_cropper.h"
 #include "image_noise_functions.h"
+#include "random_channel_swap.h"
 
 
 // new copy and set learning rate includes
@@ -633,6 +634,7 @@ int main(int argc, char** argv)
                 for (auto&& tc : train_batch_samples)
                 {
                     apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
+                    swap_channels(tc, rnd);
                 }
 
 #if defined(_DEBUG)

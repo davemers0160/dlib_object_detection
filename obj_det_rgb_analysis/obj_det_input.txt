@@ -9,13 +9,14 @@ D:/Projects/object_detection_data/dc/test/dc_test_full_input_v3.txt, 0
 
 #2 network: this tells the code which trained network file to load
 #D:/Projects/dlib_object_detection/obj_det_run/nets/51183_0/nets/tfd_v03_20_20_100_HPC_final_net.dat
-#/home/owner/Projects/dlib_object_detection/common/nets/tfd_v02_35_40_100_HPC_final_net.dat
 #D:/Projects/robot/obj_det/nets/53320_0_nets/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat
-D:/Projects/dlib_object_detection/common/nets/53320_0_nets/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat
+#D:/Projects/dlib_object_detection/common/nets/53320_0_nets/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat
+D:/Projects/dlib_object_detection/obj_det_rgb_analysis/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat
 #/home/owner/Projects/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat
+#/home/owner/Projects/dlib_object_detection/common/nets/tfd_v02_35_40_100_HPC_final_net.dat
 
 #3 version name: this is used as the prepend to all files, must end with "_"
-dc3_v04_v3_
+dc3_v10e_v3_
 
 #4 root location where the results will be saved -> must have the following folders: nets, results, result_images
-../results/dc_v04/
+../results/dc_v10/
