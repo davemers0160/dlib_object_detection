@@ -674,7 +674,7 @@ int main(int argc, char** argv)
                 // apply some noise to the image
                 for (auto&& tc : train_batch_samples)
                 {
-                    apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
+                    apply_poisson_noise(tc, std, rnd, 0.0, 255.0);
                 }
 
 #if defined(_DEBUG)
