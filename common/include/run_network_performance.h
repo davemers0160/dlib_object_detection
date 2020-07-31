@@ -11,6 +11,7 @@
 #include <string>
 
 // Custom Includes
+#include "array_image_operations.h"
 #include "eval_net_performance.h"
 
 // dlib Includes
