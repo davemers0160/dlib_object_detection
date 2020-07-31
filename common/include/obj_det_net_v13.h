@@ -1,15 +1,14 @@
 #ifndef NET_DEFINITION_H
 #define NET_DEFINITION_H
 
-
 // dlib includes
 #include "dlib/dnn.h"
 #include "dlib/dnn/core.h"
 
 #include "input_array_image_pryamid.h"
 
+const uint32_t pyramid_size = 4;
 extern const uint32_t array_depth = 1;
-//extern const uint32_t secondary = 1;
 
 // --------------------------------- Conv Filter Setup ------------------------------------
 template <long num_filters, typename SUBNET> using con1 = dlib::con<num_filters, 1, 1, 1, 1, SUBNET>;
@@ -50,11 +49,16 @@ template <long num_filters, typename SUBNET> using cont9u = dlib::cont<num_filte
 // ----------------------------------------------------------------------------------------
 
 // --------------------------------------block definitions---------------------------------
-template<typename SUBNET> using mp2 = dlib::max_pool<2, 2, 2, 2, SUBNET>;
-template<typename SUBNET> using mp3 = dlib::max_pool<3, 3, 2, 2, SUBNET>;
-template<typename SUBNET> using mp7 = dlib::max_pool<7, 7, 2, 2, SUBNET>;
-template<typename SUBNET> using mp9 = dlib::max_pool<9, 9, 2, 2, SUBNET>;
+template<typename SUBNET> using mp22 = dlib::max_pool<2, 2, 2, 2, SUBNET>;
+template<typename SUBNET> using mp32 = dlib::max_pool<3, 3, 2, 2, SUBNET>;
+template<typename SUBNET> using mp72 = dlib::max_pool<7, 7, 2, 2, SUBNET>;
+template<typename SUBNET> using mp92 = dlib::max_pool<9, 9, 2, 2, SUBNET>;
 
+template<typename SUBNET> using ap22 = dlib::avg_pool<2, 2, 2, 2, SUBNET>;
+template<typename SUBNET> using ap32 = dlib::avg_pool<3, 3, 2, 2, SUBNET>;
+template<typename SUBNET> using ap52 = dlib::avg_pool<5, 5, 2, 2, SUBNET>;
+template<typename SUBNET> using ap72 = dlib::avg_pool<7, 7, 2, 2, SUBNET>;
+template<typename SUBNET> using ap92 = dlib::avg_pool<9, 9, 2, 2, SUBNET>;
 
 template <int N1, int N2, int N3, typename SUBNET> using blk3 = dlib::bn_con<con1<N1, dlib::prelu<dlib::bn_con<con3<N2, dlib::prelu<dlib::bn_con<con1<N3, SUBNET>>>>>>>>;
 template <int N1, int N2, int N3, typename SUBNET> using ablk3 = dlib::affine<con1<N1, dlib::prelu<dlib::affine<con3<N2, dlib::prelu<dlib::affine<con1<N3, SUBNET>>>>>>>>;
@@ -119,7 +123,7 @@ using net_type = dlib::loss_mmod<con7<1,
     con2d<64, res_blk3<64,64,32, cbp3_blk<64,
     con2d<32, res_blk5<32,32,16, cbp5_blk<32,
 
-    mp2<dlib::input_array_image_pyramid<dlib::pyramid_down<4>, array_depth>>
+    ap32<dlib::input_array_image_pyramid<dlib::pyramid_down<pyramid_size>, array_depth>>
     >>> >>> >> >>;
 
 using anet_type = dlib::loss_mmod<con7<1,
@@ -128,7 +132,7 @@ using anet_type = dlib::loss_mmod<con7<1,
     con2d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
     con2d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
 
-    mp2<dlib::input_array_image_pyramid<dlib::pyramid_down<4>, array_depth>>   
+    ap32<dlib::input_array_image_pyramid<dlib::pyramid_down<pyramid_size>, array_depth>>
     >>> >>> >> >>;
 
 // ----------------------------------------------------------------------------------------
@@ -136,7 +140,7 @@ using anet_type = dlib::loss_mmod<con7<1,
 // ----------------------------------------------------------------------------------------
 
 template <typename net_type>
-net_type config_net(dlib::mmod_options options, std::array<float, array_depth> avg_color, std::vector<uint32_t> params)
+net_type config_net(dlib::mmod_options options, std::vector<float> avg_color, std::vector<uint32_t> params)
 {
 
     net_type net = net_type(options, dlib::num_con_outputs(params[0]),
@@ -153,11 +157,12 @@ net_type config_net(dlib::mmod_options options, std::array<float, array_depth> a
         dlib::num_con_outputs(params[11]),
         dlib::num_con_outputs(params[12]),
         dlib::num_con_outputs(params[13]),
-        dlib::num_con_outputs(params[14])
+        dlib::num_con_outputs(params[14]),
+        dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>(avg_color[0], avg_color[1], avg_color[2])
     );
 
     net.subnet().layer_details().set_num_filters(options.detector_windows.size());
-    dlib::layer<net_type::num_layers - 1>(net).set_avg_color(avg_color);
+    //dlib::layer<net_type::num_layers - 1>(net).input_rgb_image_pyramid(avg_color[0], avg_color[1], avg_color[2]);
 
     return net;
 
