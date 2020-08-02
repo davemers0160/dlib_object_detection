@@ -27,7 +27,7 @@
 #include "overlay_bounding_box.h"
 
 // Net Version
-#include "obj_det_net_v10.h"
+#include "obj_det_net_v13.h"
 //#include "tfd_net_v03.h"
 #include "load_data.h"
 #include "run_network_performance.h"
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
 		data_log_stream.open((results_save_location + logfileName), ios::out | ios::app);
 
 		// Add the date and time to the start of the log file
-		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 		data_log_stream << "Version: 2.0    Date: " << sdate << "    Time: " << stime << std::endl;
 		data_log_stream << "Platform: " << platform << std::endl;
 		data_log_stream << std::endl;
@@ -222,12 +222,12 @@ int main(int argc, char** argv)
 #endif
 
 		test_file.erase(test_file.begin());
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
 		std::cout << "data_directory:        " << test_data_directory << std::endl;
         std::cout << "test input file:       " << test_inputfile << std::endl;
 		std::cout << "Test image sets to parse: " << test_file.size() << std::endl;
 
-        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
         data_log_stream << test_inputfile << std::endl;
         data_log_stream << "Test image sets to parse: " << test_file.size() << std::endl;
 
@@ -253,21 +253,23 @@ int main(int argc, char** argv)
         // load the network from the saved file
         anet_type test_net;
 
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl; 
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl; 
         std::cout << "Loading network: " << (network_weights_file) << std::endl;
         dlib::deserialize(network_weights_file) >> test_net;
 
         // show the network to verify that it looks correct
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << test_net << std::endl;
 
+        data_log_stream << std::endl << "-------------------------------------------------------------------------------" << std::endl;
+        data_log_stream << network_weights_file << std::endl;
         data_log_stream << test_net << std::endl;
-        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
         // get the details about the loss layer -> the number and names of the classes
         dlib::mmod_options options = dlib::layer<0>(test_net).loss_details().get_options();
 
-        std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << "-------------------------------------------------------------------------------" << std::endl;
 
         std::cout << "num detector windows: " << options.detector_windows.size() << std::endl;
         data_log_stream << "num detector windows: " << options.detector_windows.size() << std::endl;
@@ -410,13 +412,15 @@ int main(int argc, char** argv)
         acc = (num_gt == 0) ? 0.0 : match_count / (double)num_gt;
 */
 
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
         std::cout << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
 
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
         data_log_stream << "Testing Results (detction_accuracy, correct_detects, groundtruth, false_positives, missing_detections):  " << std::fixed << std::setprecision(4) << test_results(0, 0);
         data_log_stream << ", " << test_results(0, 3) << ", " << test_results(0, 1) << ", " << test_results(0, 4) << ", " << test_results(0, 5) << std::endl;
-        data_log_stream << "------------------------------------------------------------------" << std::endl;
+        data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 
 
 
@@ -430,9 +434,9 @@ int main(int argc, char** argv)
 		std::cout << e.what() << std::endl;
 
 		data_log_stream << std::endl;
-		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 		data_log_stream << e.what() << std::endl;
-		data_log_stream << "------------------------------------------------------------------" << std::endl;
+		data_log_stream << "-------------------------------------------------------------------------------" << std::endl;
 		data_log_stream.close();
 
 		std::cout << "Press Enter to close..." << std::endl;
