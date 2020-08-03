@@ -298,6 +298,9 @@ void get_cropped_detections(unsigned char* input_img,
 
         for (idx = 0; idx < d.size(); ++idx)
         {
+            // move the rect back to the original image reference frame
+            d[idx].rect = dlib::translate_rect(d[idx].rect, x, y);
+            // get the center of the rect
             dlib::point c = dlib::center(d[idx].rect);
             dets[idx] = detection_center(c.x(), c.y(), d[idx].label.c_str());
         }

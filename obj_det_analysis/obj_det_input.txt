@@ -13,7 +13,7 @@ D:/Projects/object_detection_data/FaceDetection/Data/TD_IR_A/tufts_input_half_te
 #/home/owner/Projects/dlib_object_detection/common/nets/tfd_v02_35_40_100_HPC_final_net.dat
 #D:/Projects/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat
 #/home/owner/Projects/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat
-D:/Projects/dlib_object_detection/obj_det_analysis/nets/4574850.pbs01_0_nets/nets/td_v13a_020_020_100_90_HPC_final_net.dat
+D:/Projects/dlib_object_detection/obj_det_analysis/nets/4574849.pbs01_2_nets/nets/td_v13a_020_020_100_90_HPC_final_net.dat
 
 #3 version name: this is used as the prepend to all files, must end with "_"
 td_v13a_
