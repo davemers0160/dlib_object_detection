@@ -634,7 +634,7 @@ int main(int argc, char** argv)
                 for (auto&& tc : train_batch_samples)
                 {
                     apply_poisson_noise(tc, std, rnd, (uint8_t)0, (uint8_t)255);
-                    swap_channels(tc, rnd);
+                    //swap_channels(tc, rnd);
                 }
 
 #if defined(_DEBUG)

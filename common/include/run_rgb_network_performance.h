@@ -15,6 +15,10 @@
 
 // dlib Includes
 #include <dlib/dnn.h>
+#if !defined(DLIB_NO_GUI_SUPPORT)
+#include "overlay_bounding_box.h"
+#include <dlib/gui_widgets.h>
+#endif
 
 //-----------------------------------------------------------------------------
 template <typename net_type>
