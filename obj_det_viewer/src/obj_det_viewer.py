@@ -30,6 +30,7 @@ app = QApplication([""])
 fs = []
 ffi = FFI()
 
+## ----------------------------------------------------------------------------
 # This section allows cffi to get the info about the dll and the specialized data types
 ffi.cdef('''
 struct layer_struct{
@@ -64,21 +65,23 @@ void init_net(const char *net_name, unsigned int *num_classes, struct window_str
 void get_pyramid_tiled_input(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned char** tiled_img, unsigned int* t_nr, unsigned int* t_nc);
 void run_net(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char** det_img, unsigned int *num_dets, struct detection_struct** dets);
 void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center** dets);
+void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_center** dets);
 void close_lib();
 void get_layer_01(struct layer_struct *data, const float** data_params);
 ''')
+## ----------------------------------------------------------------------------
 
 
 # modify these to point to the right locations
 if platform.system() == "Windows":
     libname = "obj_det.dll"
     lib_location = "D:/Projects/dlib_object_detection/obj_det_lib/build/Release/" + libname
-    weights_file = "D:/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
+    weights_file = "D:/Projects/dlib_object_detection/common/nets/td_v13a_020_020_100_90_HPC_final_net.dat"
 elif platform.system() == "Linux":
     libname = "libobj_det.so"
     home = os.path.expanduser('~')
     lib_location = home + "/Projects/dlib_object_detection/obj_det_lib/build/" + libname
-    weights_file = home + "/Projects/dlib_object_detection/obj_det_lib/nets/fd_v10a_HPC_final_net.dat"
+    weights_file = home + "/Projects/dlib_object_detection/common/nets/td_v13a_020_020_100_90_HPC_final_net.dat"
 else:
     quit()
 
@@ -86,6 +89,8 @@ else:
 # read and write global
 obj_det_lib = []
 x_r = y_r = min_img = max_img = 0
+
+p1_src = ColumnDataSource(data=dict(input_img=[]))
 
 sd = dict(input_img=[], pyr_img=[], det_view=[])
 
@@ -177,9 +182,9 @@ def init_lib():
 
     bp = 1
 
+
 def get_input():
-    global obj_det_lib, ls_01, ld_01, detection_windows, t_nr, t_nc, tiled_img, det_img, num_dets, dets, tmp_list, fs, \
-        results_div, filename_div, image_path, rgba_img, img_nr, img_nc, p1, dc
+    global detection_windows, results_div, filename_div, image_path
 
     image_name = QFileDialog.getOpenFileName(None, "Select a file",  image_path, "Image files (*.png *.jpg *.gif);;All files (*.*)")
     filename_div.text = "File name: " + image_name[0]
@@ -190,14 +195,22 @@ def get_input():
     # load in an image
     image_path = os.path.dirname(image_name[0])
     color_img = cv.imread(image_name[0])
+
+    # convert the image to RGBA for display
+    rgba_img = cv.cvtColor(color_img, cv.COLOR_RGB2RGBA)
+    p1_src.data = {'input_img': [np.flipud(rgba_img)]}
+    #p1.image_rgba(image=[np.flipud(rgba_img)], x=0, y=0, dw=400, dh=400)
+
+    run_detection(color_img)
+
+
+def run_detection(color_img):
+    global p1, obj_det_lib, num_dets, dets, det_img, rgba_img, img_nr, img_nc, dc, tiled_img, t_nr, t_nc
+
     gray_img = cv.cvtColor(color_img, cv.COLOR_BGR2GRAY)
     color_img = cv.cvtColor(color_img, cv.COLOR_BGR2RGB)
     img_nr = color_img.shape[0]
     img_nc = color_img.shape[1]
-
-    # convert the image to RGBA for display
-    rgba_img = cv.cvtColor(color_img, cv.COLOR_RGB2RGBA)
-    p1.image_rgba(image=[np.flipud(rgba_img)], x=0, y=0, dw=400, dh=400)
 
     # run the image on network and get the results
     obj_det_lib.run_net(gray_img.tobytes(), img_nr, img_nc, det_img, num_dets, dets)
@@ -207,6 +220,7 @@ def get_input():
     update_plots()
 
     bp = 1
+
 
 def update_plots():
     global ls_01, ld_01, detection_windows, t_nr, t_nc, tiled_img, det_img, num_dets, dets, \
@@ -240,8 +254,8 @@ def update_plots():
     ti.image_rgba(image=[np.flipud(tiled_img_view)], x=0, y=0, dw=400, dh=400)
 
     # start to create the source data based on the static/know inputs
-    source.data = {'input_img': [np.flipud(rgba_img)], 'det_view': [np.flipud(det_img_view)],
-                   'tiled_img': [np.flipud(tiled_img_view)]}
+    #source.data = {'input_img': [np.flipud(rgba_img)], 'det_view': [np.flipud(det_img_view)],
+    #               'tiled_img': [np.flipud(tiled_img_view)]}
 
     # get the Layer 01 data and shape it correctly
     obj_det_lib.get_layer_01(ls_01, ld_01)
@@ -272,8 +286,6 @@ def update_plots():
         #fs[idx].tools[0].tooltips = {"Value": "$l01_list[idx]"}
 
     bp = 1
-
-
 
 
 # the main entry point into the code
@@ -307,7 +319,7 @@ for idx in range(num_det_wins):
     sd_key = "l01_img_" + "{:04d}".format(idx)
     fl_data = "@l01_imgf_" + "{:04d}".format(idx)
     fs_title = detection_windows["label"][idx] + " (" + str(detection_windows["h"][idx]) + "x" + str(detection_windows["w"][idx]) + ")"
-    fs_tmp = figure(plot_height=600, plot_width=300, title=fs_title, tools=['wheel_zoom', 'box_zoom', 'reset', 'save', 'pan'])
+    fs_tmp = figure(plot_height=600, plot_width=300, title=fs_title, tools=['pan', 'box_zoom', 'reset', 'save'], toolbar_location="right")
     # fs_tmp.image_rgba(image=sd_key, x=0, y=0, dw=400, dh=400, source=source)
     fs_tmp.image_rgba(image=[], x=0, y=0, dw=400, dh=400)
     fs_tmp.axis.visible = False
@@ -317,15 +329,16 @@ for idx in range(num_det_wins):
     # fs_tmp.add_tools(HoverTool(tooltips=[("value ", fl_data)]))
     fs.append(fs_tmp)
 
-p1 = figure(plot_height=350, plot_width=500, title="Input image")
-# p1.image_rgba(image="input_img", x=0, y=0, dw=400, dh=400, source=source)
-p1.image_rgba(image=[], x=0, y=0, dw=400, dh=400)
+p1 = figure(plot_height=350, plot_width=500, title="Input image", tools=['pan', 'box_zoom', 'box_select', 'save', 'reset'], toolbar_location="right")
+p1.image_rgba(image="input_img", x=0, y=0, dw=400, dh=400, source=p1_src)
+#p1.image_rgba(image=[], x=0, y=0, dw=400, dh=400)
 p1.axis.visible = False
 p1.grid.visible = False
 p1.x_range.range_padding = 0
 p1.y_range.range_padding = 0
+#p1.select('BoxSelectTool').select_every_mousemove = False
 
-p2 = figure(plot_height=350, plot_width=500, title="Detection Results")
+p2 = figure(plot_height=350, plot_width=500, title="Detection Results", tools=['pan', 'box_zoom', 'save', 'reset'], toolbar_location="right")
 # p2.image_rgba(image="det_view", x=0, y=0, dw=400, dh=400, source=source)
 p2.image_rgba(image=[], x=0, y=0, dw=400, dh=400)
 p2.axis.visible = False
@@ -333,7 +346,7 @@ p2.grid.visible = False
 p2.x_range.range_padding = 0
 p2.y_range.range_padding = 0
 
-ti = figure(plot_height=600, plot_width=300, title="Tiled Image Input")
+ti = figure(plot_height=600, plot_width=300, title="Tiled Image Input", tools=['pan', 'box_zoom', 'save', 'reset'], toolbar_location="right")
 # ti.image_rgba(image="tiled_img", x=0, y=0, dw=400, dh=400, source=source)
 ti.image_rgba(image=[], x=0, y=0, dw=400, dh=400)
 ti.axis.visible = False
@@ -344,6 +357,24 @@ ti.y_range.range_padding = 0
 
 get_input()
 # layout = column([row([column([p1, p2]), l12, l08]), row([Spacer(width=200, height=375), l02, l01])])
+
+
+def selection_change(attrname, old, new):
+    global p1_src
+
+    #t1, t2 = ticker1.value, ticker2.value
+    #data = get_data(t1, t2)
+    selected = p1_src.selected.indices
+    print("test1")
+    print(selected)
+
+    #if selected:
+    #    data = data.iloc[selected, :]
+    #update_stats(data, t1, t2)
+
+
+#p1.on_change('indices', selection_change)
+p1_src.selected.on_change('indices', selection_change)
 
 ol = [ti]
 ol.extend(fs)
@@ -356,15 +387,15 @@ doc.title = "Object Detection Viewer"
 doc.add_root(layout)
 # doc.add_periodic_callback(update_plots, update_time)
 
-def cleanup_session(session_context):
-    ''' If present, this function is called when a session is closed. '''
-    global obj_det_lib
-    print(session_context)
-    print("Closing ...")
-    obj_det_lib.close_lib()
+#def cleanup_session(session_context):
+#    ''' If present, this function is called when a session is closed. '''
+#    global obj_det_lib
+#    print(session_context)
+#    print("Closing ...")
+#    obj_det_lib.close_lib()
 
 
-doc.on_session_destroyed(cleanup_session)
+#doc.on_session_destroyed(cleanup_session)
 
 
 # doc.hold('combine')
@@ -374,6 +405,6 @@ doc.on_session_destroyed(cleanup_session)
 # get_input()
 #
 # bp = 1
-# show(layout)
+show(layout)
 
 
