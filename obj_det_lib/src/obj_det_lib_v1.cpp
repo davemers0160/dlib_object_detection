@@ -17,7 +17,8 @@
 // Custom includes
 #include "file_ops.h"
 #include "obj_det_lib.h"
-#include "tfd_net_v03.h"
+//#include "tfd_net_v03.h"
+#include "obj_det_net_v13.h"
 #include "prune_detects.h"
 
 // dlib includes

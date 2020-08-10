@@ -4,7 +4,7 @@
 
 #1 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
-D:/Projects/object_detection_data/dc/test/dc_test_full_input_v3.txt, 0
+D:/Projects/object_detection_data/dc/test/dc_test_full_input_v4.txt, 0
 #/home/owner/Projects/object_detection_data/FaceDetection/thermal_face_test_green_v1.txt, 0
 
 #2 network: this tells the code which trained network file to load
