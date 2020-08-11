@@ -109,9 +109,9 @@ def jet_color(t, t_min, t_max):
     t_m = (t_max - t_avg) / 2.0
 
     rgba = np.empty((t.shape[0], t.shape[1], 4), dtype=np.uint8)
-    rgba[:, :, 0] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg - t_m)))).astype(np.uint8)
+    rgba[:, :, 0] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg + t_m)))).astype(np.uint8)
     rgba[:, :, 1] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg)))).astype(np.uint8)
-    rgba[:, :, 2] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg + t_m)))).astype(np.uint8)
+    rgba[:, :, 2] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg - t_m)))).astype(np.uint8)
     rgba[:, :, 3] = np.full((t.shape[0], t.shape[1]), 255, dtype=np.uint8)
     return rgba
 
@@ -279,7 +279,7 @@ def update_plots():
         s2 = (idx+1)*img_length
         l01_list.append(np.reshape(l01_data[s1:s2], [ls_01.nr, ls_01.nc]))
         # l01_jet = jet_color(l01_list[idx], l01_min, l01_max)
-        l01_jet = jet_color(l01_list[idx], -5.0, l01_max)
+        l01_jet = jet_color(l01_list[idx], -5.0, 0)
         fs[idx].image_rgba(image=[np.flipud(l01_jet)], x=0, y=0, dw=400, dh=400)
         # source.data[sd_key] = [np.flipud(l01_jet)]
         # source.data[fl_data] = [l01_list[idx]]
