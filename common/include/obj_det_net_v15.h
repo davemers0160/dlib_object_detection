@@ -117,20 +117,20 @@ input[4] -> downsampler -> rcon3 -> rcon3 -> rcon3 -> con6
 // layer causes the network to operate over a spatial pyramid, making the detector
 // scale invariant.  
 
-using net_type = dlib::loss_mmod<con7<1,
+using net_type = dlib::loss_mmod<con9<1,
 
     res_blk3<128,128,64, cbp3_blk<128,
-    con2d<64, res_blk3<64,64,32, cbp3_blk<64,
-    con2d<32, res_blk5<32,32,16, cbp5_blk<32,
+    con5d<64, res_blk3<64,64,32, cbp3_blk<64,
+    con5d<32, res_blk5<32,32,16, cbp5_blk<32,
 
     ap32<dlib::input_array_image_pyramid<dlib::pyramid_down<pyramid_size>, array_depth>>
     >>> >>> >> >>;
 
-using anet_type = dlib::loss_mmod<con7<1,
+using anet_type = dlib::loss_mmod<con9<1,
 
     ares_blk3<128, 128, 64, acbp3_blk<128,
-    con2d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
-    con2d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
+    con5d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
+    con5d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
 
     ap32<dlib::input_array_image_pyramid<dlib::pyramid_down<pyramid_size>, array_depth>>
     >>> >>> >> >>;
