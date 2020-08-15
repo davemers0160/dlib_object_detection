@@ -169,15 +169,15 @@ int main(int argc, char** argv)
 
 	//sync_save_location = program_root + "nets/";
 	//results_save_location = program_root + "results/";
-	//image_save_location = program_root + "result_images/";
 
 #endif
+	image_save_location = results_save_location;
 
 	std::cout << "Reading Inputs... " << std::endl;
 	std::cout << "Platform:              " << platform << std::endl;
 	std::cout << "program_root:          " << program_root << std::endl;
 	std::cout << "results_save_location: " << results_save_location << std::endl;
-
+	std::cout << "image_save_location:   " << image_save_location << std::endl;
 
 	try {
 
