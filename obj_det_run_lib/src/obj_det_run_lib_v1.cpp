@@ -1,8 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 
- #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
- #include <windows.h>
- #endif
+#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include <cmath>
 #include <cstdlib>
@@ -20,14 +22,12 @@
 
 // Custom includes
 #include "obj_det_run.h"
-//#include "get_platform.h"
-#include "get_current_time.h"
+//#include "get_current_time.h"
 #include "num2string.h"
 #include "file_ops.h"
-#include "sleep_ms.h"
+//#include "sleep_ms.h"
+#include "opencv_colormap_functions.h"
 
-// object detector library header
-#include "obj_det_lib.h"
 
 // OpenCV Includes
 #include <opencv2/core.hpp>
@@ -35,8 +35,6 @@
 #include <opencv2/imgproc.hpp>
 
 // -------------------------------GLOBALS--------------------------------------
-
-
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
@@ -57,7 +55,7 @@ int main(int argc, char** argv)
     auto start_time = chrono::system_clock::now();
     auto stop_time = chrono::system_clock::now();
     auto elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
-    std::string sdate, stime;
+    //std::string sdate, stime;
 
     // data IO variables
     const std::string os_file_sep = "/";
@@ -68,6 +66,7 @@ int main(int argc, char** argv)
 
     std::string test_inputfile;
     std::string trained_net_file;
+    std::string lib_filename;
 
     std::pair<std::string, uint8_t> test_input;
     std::string test_data_directory;
@@ -80,12 +79,15 @@ int main(int argc, char** argv)
 
     window_struct* det_win;
     struct detection_center* detects;
-    struct detection_struct* dets;
+    //struct detection_struct* dets;
     
     unsigned char* tiled_img = NULL;
     unsigned char* det_img = NULL;
 
-    cv::Mat img;
+    cv::Mat img, heatmap;
+
+    std::string img_win_name = "Image";
+    std::string heat_win_name = "Heatmap Output";
   
     // ----------------------------------------------------------------------------------------
     if (argc == 1)
@@ -113,12 +115,13 @@ int main(int argc, char** argv)
 #endif
 
     std::cout << "Reading Inputs... " << std::endl;
-    std::cout << "program_root:          " << program_root << std::endl;
-    std::cout << "save_directory:        " << save_directory << std::endl;
+    std::cout << "program_root:        " << program_root << std::endl;
+    std::cout << "net_file:            " << trained_net_file << std::endl;
+    std::cout << "save_directory:      " << save_directory << std::endl;
 
     try {
 
-        get_current_time(sdate, stime);
+        //get_current_time(sdate, stime);
 
 //-----------------------------------------------------------------------------
 // Read in the testing images
@@ -148,14 +151,7 @@ int main(int argc, char** argv)
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
         test_data_directory = test_file[0][0];
 #else
-        if (HPC == 1)
-        {
-            test_data_directory = test_file[0][2];
-        }
-        else
-        {
-            test_data_directory = test_file[0][1];
-        }
+        test_data_directory = test_file[0][1];
 #endif
 
         test_file.erase(test_file.begin());
@@ -165,13 +161,47 @@ int main(int argc, char** argv)
         std::cout << "data_directory: " << test_data_directory << std::endl;
         std::cout << "test images:    " << test_file.size() << std::endl;
 
+        lib_filename = "D:/Projects/dlib_object_detection/obj_det_lib/build/Release/obj_det.dll";
+
+        // load in the library
+#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+        HINSTANCE obj_det_lib = LoadLibrary(lib_filename.c_str());
+
+        if (obj_det_lib == NULL)
+        {
+            throw "error loading library";
+        }
+
+        init_net lib_init_net = (init_net)GetProcAddress(obj_det_lib, "init_net");
+        run_net lib_run_net = (run_net)GetProcAddress(obj_det_lib, "run_net");
+        get_detections lib_get_detections = (get_detections)GetProcAddress(obj_det_lib, "get_detections");
+        get_combined_output lib_get_combined_output = (get_combined_output)GetProcAddress(obj_det_lib, "get_combined_output");
+
+#else
+        void* obj_det_lib = dlopen(lib_filename, RTLD_NOW);
+
+        if (obj_det_lib == NULL)
+        {
+            throw "error loading library";
+        }
+
+        init_net lib_init_net = (init_net)dlsym(obj_det_lib, "init_net");
+        run_net lib_run_net = (run_net)dlsym(obj_det_lib, "run_net");
+        get_detections lib_get_detections = (get_detections)dlsym(obj_det_lib, "get_detections");
+        get_combined_output lib_get_combined_output = (get_combined_output)dlsym(obj_det_lib, "get_combined_output");
+
+#endif
 //-----------------------------------------------------------------------------
 //  EVALUATE THE NETWORK PERFORMANCE
 //-----------------------------------------------------------------------------
 
         // initialize the network
-        init_net(trained_net_file.c_str(), &num_classes, det_win, &num_win);
-               
+        lib_init_net(trained_net_file.c_str(), &num_classes, det_win, &num_win);
+
+        // create the windows to display the results and the heatmap
+        cv::namedWindow(img_win_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+        cv::namedWindow(heat_win_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+
         for (idx = 0; idx < test_file.size(); ++idx)
         {
         
@@ -183,19 +213,25 @@ int main(int argc, char** argv)
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
             //run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
-            get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
+            lib_get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
+
             stop_time = chrono::system_clock::now();
             
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
             
-
             layer_struct ls_01;
             const float* ld_01 = NULL;
 
             //get_layer_01(&ls_01, ld_01);
-            get_combined_output(&ls_01, ld_01);
+            lib_get_combined_output(&ls_01, ld_01);
 
-            sleep_ms(100);
+            heatmap = cv::Mat(ls_01.nr, ls_01.nc, CV_32FC1, (void*)ld_01);
+            heatmap = cv_jet(heatmap, -1.5, 0.0);
+
+            cv::imshow(img_win_name, img);
+            cv::imshow(heat_win_name, heatmap);
+
+            //sleep_ms(100);
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << test_file[idx][0] << std::endl;
@@ -207,11 +243,21 @@ int main(int argc, char** argv)
                 std::cout << "Detection: " << std::string(detects[jdx].name) << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
             }
 
+            cv::waitKey(1);
+
+            int bp = 1;
         }
 
-        close_lib();
+        //close_lib();
 
-        std::cout << "End of Program." << std::endl;
+    // close the library
+#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+        FreeLibrary(obj_det_lib);
+#else
+        dlclose(obj_det_lib);
+#endif
+
+        std::cout << std::endl << "End of Program." << std::endl;
         std::cin.ignore();
         
     }
@@ -219,9 +265,11 @@ int main(int argc, char** argv)
     {
         std::cout << e.what() << std::endl;
 
-        std::cout << "Press Enter to close..." << std::endl;
+        std::cout << std::endl << "Press Enter to close..." << std::endl;
         std::cin.ignore();
     }
+
+    cv::destroyAllWindows();
 
     return 0;
 
