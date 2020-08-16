@@ -74,5 +74,5 @@ Windows: obj_det_run ../sample_input_file.txt
 Linux: ./obj_det_run ../sample_input_file.txt
 ```
 
-It is important to note that if the output folder specified in teh input file does not exist the program will run, but there may not be any indication that the data is not being saved.
+It is important to note that if the output folder specified in the input file does not exist the program will run, but there may not be any indication that the data is not being saved.
 

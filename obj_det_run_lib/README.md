@@ -1,6 +1,6 @@
-# Object Detector Run Project
+# Object Detector Run w/External Library Project
 
-This project links to the [dynamic library](https://github.com/davemers0160/dlib_object_detection/tree/master/obj_det_lib) project to run images through the object detector library.
+This project is designed to allow the use of a compiled dnn library with a pretrained network.  The sample library comes from the [dynamic library](https://github.com/davemers0160/dlib_object_detection/tree/master/obj_det_lib) project.  The interface is the same that is used for the dynamic object detection library.
 
 ## Dependencies
 
@@ -70,9 +70,9 @@ The code is run by supplying all of the parameters in a single file.  Using this
 To use the file enter the following:
 
 ```
-Windows: obj_det_run ../sample_input_file.txt
-Linux: ./obj_det_run ../sample_input_file.txt
+Windows: obj_det_run_lib ../sample_input_file.txt
+Linux: ./obj_det_run_lib ../sample_input_file.txt
 ```
 
-It is important to note that if the output folder specified in teh input file does not exist the program will run, but there may not be any indication that the data is not being saved.
+It is important to note that if the output folder specified in the input file does not exist the program will run, but there may not be any indication that the data is not being saved.
 

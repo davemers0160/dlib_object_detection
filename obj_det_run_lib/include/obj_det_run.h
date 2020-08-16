@@ -7,6 +7,9 @@
 #include "file_parser.h"
 
 // ----------------------------------------------------------------------------------------
+// The common function definitions that are in the dynamic library 
+// ----------------------------------------------------------------------------------------
+
 struct layer_struct
 {
     unsigned int k;
@@ -48,23 +51,21 @@ struct detection_center
 };
 
 // ----------------------------------------------------------------------------------------
-// The common functions that are in the 
-
-//void (*HelloDLL)(void);
 typedef void (*init_net)(const char* net_name, unsigned int* num_classes, struct window_struct*& det_win, unsigned int* num_win);
 typedef void (*run_net)(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char*& det_img, unsigned int* num_dets, struct detection_struct*& dets);
 typedef void (*get_detections)(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center*& dets);
 typedef void (*get_combined_output)(struct layer_struct* data, const float*& data_params);
+typedef void (*close_lib)();
 
 // ----------------------------------------------------------------------------------------
 void parse_input_file(std::string parse_filename, 
-    std::string &version, 
+    std::string & lib_filename,
     std::string &trained_net_file,
     std::pair<std::string, uint8_t> &test_input,
     std::string &save_directory
 )
 {
-
+    // parse the input file
     std::vector<std::vector<std::string>> params;
     parse_csv_file(parse_filename, params);
 
@@ -73,9 +74,9 @@ void parse_input_file(std::string parse_filename,
         switch (idx)
         {
 
-            // get the version name of the network - used for naming various files
+            // get the dynamic library filename
             case 0:
-                version = params[idx][0];
+                lib_filename = params[idx][0];
                 break;
 
             // get the trained network data file
@@ -93,15 +94,17 @@ void parse_input_file(std::string parse_filename,
                 }
                 break;
 
+            // get the location to save to data
             case 3:
                 save_directory = params[idx][0];
                 break;
 
             default:
                 break;
+
         }   // end of switch
 
-    }   // end of for
+    }   // end of for loop
 
 }   // end of parse_dnn_data_file
 

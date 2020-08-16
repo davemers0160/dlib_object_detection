@@ -6,26 +6,24 @@
 #include <dlfcn.h>
 #endif
 
-#include <cmath>
+//#include <cmath>
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
 #include <iomanip>
-#include <thread>
-#include <sstream>
-#include <fstream>
+//#include <thread>
+//#include <sstream>
+//#include <fstream>
 #include <chrono>
 #include <algorithm>
 #include <string>
-#include <utility>
+//#include <utility>
 #include <stdexcept>
 
 // Custom includes
 #include "obj_det_run.h"
-//#include "get_current_time.h"
 #include "num2string.h"
 #include "file_ops.h"
-//#include "sleep_ms.h"
 #include "opencv_colormap_functions.h"
 
 
@@ -55,11 +53,9 @@ int main(int argc, char** argv)
     auto start_time = chrono::system_clock::now();
     auto stop_time = chrono::system_clock::now();
     auto elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
-    //std::string sdate, stime;
 
     // data IO variables
     const std::string os_file_sep = "/";
-    std::string version;
     std::string parse_filename;
     std::string program_root;
     std::string save_directory;
@@ -100,7 +96,7 @@ int main(int argc, char** argv)
     parse_filename = argv[1];
 
     // parse through the supplied csv file
-    parse_input_file(parse_filename, version, trained_net_file, test_input, save_directory);
+    parse_input_file(parse_filename, lib_filename, trained_net_file, test_input, save_directory);
 
     save_directory = path_check(save_directory);
 
@@ -114,10 +110,11 @@ int main(int argc, char** argv)
 
 #endif
 
-    std::cout << "Reading Inputs... " << std::endl;
+    std::cout << "Reading Inputs... " << std::endl << std::endl;
     std::cout << "program_root:        " << program_root << std::endl;
+    std::cout << "library_filename:    " << lib_filename << std::endl;
     std::cout << "net_file:            " << trained_net_file << std::endl;
-    std::cout << "save_directory:      " << save_directory << std::endl;
+    std::cout << "save_directory:      " << save_directory << std::endl << std::endl;
 
     try {
 
@@ -127,6 +124,7 @@ int main(int argc, char** argv)
 // Read in the testing images
 //-----------------------------------------------------------------------------
 
+        std::cout << "------------------------------------------------------------------" << std::endl;
         // parse through the supplied test input file
         switch (test_input.second)
         {
@@ -140,7 +138,7 @@ int main(int argc, char** argv)
             break;
         }
 
-        //parse_group_csv_file(test_inputfile, '{', '}', test_file);
+        // check for an empty data file
         if (test_file.size() == 0)
         {
             std::cout << test_input.first << ": ";
@@ -156,12 +154,9 @@ int main(int argc, char** argv)
 
         test_file.erase(test_file.begin());
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "input file:     " << test_input.first << std::endl;
         std::cout << "data_directory: " << test_data_directory << std::endl;
         std::cout << "test images:    " << test_file.size() << std::endl;
-
-        lib_filename = "D:/Projects/dlib_object_detection/obj_det_lib/build/Release/obj_det.dll";
 
         // load in the library
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
@@ -169,28 +164,31 @@ int main(int argc, char** argv)
 
         if (obj_det_lib == NULL)
         {
-            throw "error loading library";
+            throw std::runtime_error("error loading library");
         }
 
         init_net lib_init_net = (init_net)GetProcAddress(obj_det_lib, "init_net");
         run_net lib_run_net = (run_net)GetProcAddress(obj_det_lib, "run_net");
         get_detections lib_get_detections = (get_detections)GetProcAddress(obj_det_lib, "get_detections");
         get_combined_output lib_get_combined_output = (get_combined_output)GetProcAddress(obj_det_lib, "get_combined_output");
+        close_lib lib_close_lib = (close_lib)GetProcAddress(obj_det_lib, "close_lib");
 
 #else
         void* obj_det_lib = dlopen(lib_filename, RTLD_NOW);
 
         if (obj_det_lib == NULL)
         {
-            throw "error loading library";
+            throw std::runtime_error("error loading library");
         }
 
         init_net lib_init_net = (init_net)dlsym(obj_det_lib, "init_net");
         run_net lib_run_net = (run_net)dlsym(obj_det_lib, "run_net");
         get_detections lib_get_detections = (get_detections)dlsym(obj_det_lib, "get_detections");
         get_combined_output lib_get_combined_output = (get_combined_output)dlsym(obj_det_lib, "get_combined_output");
+        close_lib lib_close_lib = (close_lib)dlsym(obj_det_lib, "close_lib");
 
 #endif
+
 //-----------------------------------------------------------------------------
 //  EVALUATE THE NETWORK PERFORMANCE
 //-----------------------------------------------------------------------------
@@ -219,19 +217,17 @@ int main(int argc, char** argv)
             
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
             
-            layer_struct ls_01;
-            const float* ld_01 = NULL;
+            layer_struct ls_hm;
+            const float* ld_hm = NULL;
 
             //get_layer_01(&ls_01, ld_01);
-            lib_get_combined_output(&ls_01, ld_01);
+            lib_get_combined_output(&ls_hm, ld_hm);
 
-            heatmap = cv::Mat(ls_01.nr, ls_01.nc, CV_32FC1, (void*)ld_01);
+            heatmap = cv::Mat(ls_hm.nr, ls_hm.nc, CV_32FC1, (void*)ld_hm);
             heatmap = cv_jet<float>(heatmap, -1.5, 0.0);
 
             cv::imshow(img_win_name, img);
             cv::imshow(heat_win_name, heatmap);
-
-            //sleep_ms(100);
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << test_file[idx][0] << std::endl;
@@ -243,12 +239,13 @@ int main(int argc, char** argv)
                 std::cout << "Detection: " << std::string(detects[jdx].name) << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
             }
 
-            cv::waitKey(1);
+            cv::waitKey(5);
 
             int bp = 1;
         }
 
-        //close_lib();
+        std::cout << std::endl;
+        lib_close_lib();
 
     // close the library
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
