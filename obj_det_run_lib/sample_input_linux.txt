@@ -1,16 +1,15 @@
 # data file for loading information into dlib based dnn projects
 
-#0 version name: this is used as the prepend to all files, must end with "_"
-tfd_v03_
+#0 dynamic library: the location of the dynamic library file
+../../obj_det_lib/build/libobj_det.so
 
 #1 network: this tells the code which trained network file to load
-#/home/owner/Projects/dlib_object_detection/common/nets/tfd_v03_20_20_100_HPC_final_net.dat
-../../common/nets/tfd_v03_20_20_100_HPC_final_net.dat
+../../common/nets/td_v13a_020_020_100_90_HPC_final_net.dat
 
 #2 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
-#/home/owner/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 0
 ../../obj_det_lib/images/test_input.txt, 0
 
 #3 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/
+

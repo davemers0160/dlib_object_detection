@@ -174,7 +174,7 @@ int main(int argc, char** argv)
         close_lib lib_close_lib = (close_lib)GetProcAddress(obj_det_lib, "close_lib");
 
 #else
-        void* obj_det_lib = dlopen(lib_filename, RTLD_NOW);
+        void* obj_det_lib = dlopen(lib_filename.c_str(), RTLD_NOW);
 
         if (obj_det_lib == NULL)
         {

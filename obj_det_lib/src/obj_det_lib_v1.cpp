@@ -320,9 +320,12 @@ void get_cropped_detections(unsigned char* input_img,
 void close_lib()
 {
     std::cout << "Closing..." << std::endl;
-    //net.~net();
+    net.clean();
+
     class_names.clear();
     class_color.clear();
+
+    
 }   // end of close_lib
 
 //----------------------------------------------------------------------------------

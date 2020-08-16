@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-#  Root CMake file for ML Project
+#  Root CMake file for Object Detection Run w/compiled Library
 # ----------------------------------------------------------------------------
 #
 # Example CMake build line for windows & VS2015
@@ -41,9 +41,6 @@ if(WIN32)
     else()
         set(COMMON_ROOT "D:/Common")
     endif()
-    
-    #set(OBJ_DET_DIRS "${PR_ROOT}/obj_det_lib/include")
-    #set(OBJ_DET_LIBS "${PR_ROOT}/obj_det_lib/build/Release/obj_det.lib")
 
 else()
     if(${PLATFORM} STREQUAL "HPC")
@@ -53,9 +50,6 @@ else()
     else()
         set(COMMON_ROOT "~/Projects/Common")
     endif()
-
-    #set(OBJ_DET_DIRS "${PR_ROOT}/obj_det_lib/include")
-    #set(OBJ_DET_LIBS "${PR_ROOT}/obj_det_lib/build/libobj_det.so")
     
 endif()
 
@@ -66,14 +60,12 @@ include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 # grab all of the *.cpp files in the src directory
 file(GLOB SOURCES "src/*.cpp" 
     "${COMMON_ROOT}/src/*.cpp"
-#    "${DLIB_CONTRIB}/src/*.cpp"
+
     )
 
 set(project_includes "include" 
     "${PR_ROOT}/common/include"
     "${COMMON_ROOT}/include" 
-#    "${DLIB_CONTRIB}/include" 
-#    "${OBJ_DET_DIRS}"
     )
 
 # find OpenCV
@@ -105,17 +97,22 @@ message(" ")
 
 include_directories(${project_includes})
 add_executable(${exe_name} ${SOURCES})
-target_link_libraries(${exe_name} ${OpenCV_LIBS})
+
 
 
 if(WIN32)
-    #target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${OBJ_DET_LIBS})
+    target_link_libraries(${exe_name} ${OpenCV_LIBS})
+    
     message("MSVC Version: " ${MSVC_VERSION})
-    # uncomment for MSVC and cmake greater than 3.6.0
+    
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
         target_compile_options(${exe_name} PRIVATE "/MP")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
+    
+elseif(UNIX)
+    target_link_libraries(${exe_name} ${OpenCV_LIBS} ${CMAKE_DL_LIBS})
+    
 endif()
 
 message(" ")

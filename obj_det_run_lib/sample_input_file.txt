@@ -1,10 +1,10 @@
 # data file for loading the required information into the projects
 
-#0 the location of the dynamic library file
-D:/Projects/dlib_object_detection/obj_det_lib/build/Release/obj_det.dll
+#0 dynamic library: the location of the dynamic library file
+../../obj_det_lib/build/Release/obj_det.dll
 
 #1 network weights file: this tells the code which trained network file to load
-D:/Projects/dlib_object_detection/common/nets/td_v13a_020_020_100_90_HPC_final_net.dat
+../../common/nets/td_v13a_020_020_100_90_HPC_final_net.dat
 
 #2 data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
@@ -12,3 +12,4 @@ D:/Projects/object_detection_data/FaceDetection/thermal_face_test_small_v1.txt, 
 
 #3 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/
+
