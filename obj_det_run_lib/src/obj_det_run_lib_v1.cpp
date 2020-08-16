@@ -226,7 +226,7 @@ int main(int argc, char** argv)
             lib_get_combined_output(&ls_01, ld_01);
 
             heatmap = cv::Mat(ls_01.nr, ls_01.nc, CV_32FC1, (void*)ld_01);
-            heatmap = cv_jet(heatmap, -1.5, 0.0);
+            heatmap = cv_jet<float>(heatmap, -1.5, 0.0);
 
             cv::imshow(img_win_name, img);
             cv::imshow(heat_win_name, heatmap);
