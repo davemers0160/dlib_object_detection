@@ -28,6 +28,10 @@
 #endif
 
 // ----------------------------------------------------------------------------------------
+const int label_size = 256;
+
+
+// ----------------------------------------------------------------------------------------
 struct layer_struct
 {
     unsigned int k;
@@ -44,7 +48,7 @@ struct detection_struct
     unsigned int y;
     unsigned int w;
     unsigned int h;
-    char name[256];
+    char name[label_size];
 
     detection_struct()
     {
@@ -71,7 +75,7 @@ struct detection_center
 {
     unsigned int x;
     unsigned int y;
-    char name[256];
+    char name[label_size];
 
     detection_center()
     {
@@ -94,7 +98,7 @@ struct window_struct
 {
     unsigned int w;
     unsigned int h;
-    char label[256];    
+    char label[label_size];
 };
 
 // ----------------------------------------------------------------------------------------
@@ -134,7 +138,7 @@ extern "C" {
 #endif
     // This function will take an grayscale image in unsigned char row major order [r0,c0, r0,c1, r0,c2,...]
     // as an input and will return the centers of the detections in the image
-    OBJ_DLL_API void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center*& dets);
+    OBJ_DLL_API void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_struct*& dets);
 #ifdef __cplusplus
 }
 #endif
@@ -145,7 +149,7 @@ extern "C" {
 #endif
     // This function will take an grayscale image in unsigned char row major order [r0,c0, r0,c1, r0,c2,...]
     // as an input and will return the centers of the detections in the image
-    OBJ_DLL_API void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_center*& dets);
+    OBJ_DLL_API void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_struct*& dets);
 #ifdef __cplusplus
 }
 #endif

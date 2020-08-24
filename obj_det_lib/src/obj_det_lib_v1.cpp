@@ -133,6 +133,7 @@ void run_net(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigne
     uint64_t r, c;
     uint64_t idx = 0;
     uint64_t index = 0;
+    std::string label;
 
     dlib::matrix<dlib::rgb_pixel> img(nr, nc);
     std::array<dlib::matrix<uint8_t>, array_depth> a_img;
@@ -190,12 +191,14 @@ void run_net(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigne
         {
             auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
             overlay_bounding_box(tmp_img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
-            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), d[idx].label.c_str());
+            label = d[idx].label.substr(0, std::min((size_t)255, d[idx].label.length()));
+            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), label.c_str());
         }
 #else
         for (idx = 0; idx < d.size(); ++idx)
         {
-            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), d[idx].label.c_str());
+            label = d[idx].label.substr(0, std::min((size_t)255, d[idx].label.length()));
+            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), label.c_str());
         }
 #endif
 
@@ -220,9 +223,15 @@ void run_net(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigne
 }   // end of run_net
 
 //----------------------------------------------------------------------------------
-void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center*& dets)
+void get_detections(unsigned char* input_img, 
+    unsigned int nr, 
+    unsigned int nc, 
+    unsigned int* num_dets, 
+    struct detection_struct*& dets
+)
 {
     uint64_t idx = 0;
+    std::string label;
 
     dlib::matrix<dlib::rgb_pixel> img(nr, nc);
     std::array<dlib::matrix<uint8_t>, array_depth> a_img;
@@ -243,12 +252,13 @@ void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, 
         prune_detects(d, 0.3);
 
         *num_dets = d.size();
-        dets = new detection_center[d.size()];
+        dets = new detection_struct[d.size()];
 
         for (idx = 0; idx < d.size(); ++idx)
         {
-            dlib::point c = dlib::center(d[idx].rect);
-            dets[idx] = detection_center(c.x(), c.y(), d[idx].label.c_str());
+            //dlib::point c = dlib::center(d[idx].rect);
+            label = d[idx].label.substr(0, std::min((size_t)255, d[idx].label.length()));
+            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), label.c_str());
         }
     }
     catch (std::exception e)
@@ -268,10 +278,11 @@ void get_cropped_detections(unsigned char* input_img,
     unsigned int w,
     unsigned int h,
     unsigned int* num_dets, 
-    struct detection_center*& dets
+    struct detection_struct*& dets
 )
 {
     uint64_t idx = 0;
+    std::string label;
 
     dlib::matrix<dlib::rgb_pixel> img(nr, nc);
     std::array<dlib::matrix<uint8_t>, array_depth> a_img;
@@ -295,7 +306,7 @@ void get_cropped_detections(unsigned char* input_img,
         prune_detects(d, 0.3);
 
         *num_dets = d.size();
-        dets = new detection_center[d.size()];
+        dets = new detection_struct[d.size()];
 
         for (idx = 0; idx < d.size(); ++idx)
         {
@@ -303,7 +314,9 @@ void get_cropped_detections(unsigned char* input_img,
             d[idx].rect = dlib::translate_rect(d[idx].rect, x, y);
             // get the center of the rect
             dlib::point c = dlib::center(d[idx].rect);
-            dets[idx] = detection_center(c.x(), c.y(), d[idx].label.c_str());
+            label = d[idx].label.substr(0, std::min((size_t)255, label.length()));
+
+            dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), label.c_str());
         }
     }
     catch (std::exception e)
