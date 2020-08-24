@@ -30,7 +30,7 @@ app = QApplication([""])
 fs = []
 ffi = FFI()
 
-## ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # This section allows cffi to get the info about the dll and the specialized data types
 ffi.cdef('''
 struct layer_struct{
@@ -64,12 +64,12 @@ struct window_struct{
 void init_net(const char *net_name, unsigned int *num_classes, struct window_struct** det_win, unsigned int *num_win);
 void get_pyramid_tiled_input(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned char** tiled_img, unsigned int* t_nr, unsigned int* t_nc);
 void run_net(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char** det_img, unsigned int *num_dets, struct detection_struct** dets);
-void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center** dets);
-void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_center** dets);
+void get_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_struct** dets);
+void get_cropped_detections(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_struct** dets);
 void close_lib();
 void get_layer_01(struct layer_struct *data, const float** data_params);
 ''')
-## ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 # modify these to point to the right locations
@@ -94,8 +94,7 @@ p1_src = ColumnDataSource(data=dict(input_img=[]))
 
 sd = dict(input_img=[], pyr_img=[], det_view=[])
 
-# ----------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------
 
 def jet_clamp(v):
     v[v < 0] = 0
@@ -105,14 +104,19 @@ def jet_clamp(v):
 def jet_color(t, t_min, t_max):
 
     t_range = t_max - t_min
-    t_avg = (t_max + t_min) / 2.0
-    t_m = (t_max - t_avg) / 2.0
+
+    p1 = t_min + t_range * (1 / 4)
+    p2 = t_min + t_range * (2 / 4)
+    p3 = t_min + t_range * (3 / 4)
 
     rgba = np.empty((t.shape[0], t.shape[1], 4), dtype=np.uint8)
-    rgba[:, :, 0] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg + t_m)))).astype(np.uint8)
-    rgba[:, :, 1] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg)))).astype(np.uint8)
-    rgba[:, :, 2] = (255*jet_clamp(1.5 - abs((4 / t_range)*(t - t_avg - t_m)))).astype(np.uint8)
+
+    rgba[:, :, 0] = (255*jet_clamp((1.0 / (p3 - p2)) * (t - p2))).astype(np.uint8)
+    rgba[:, :, 1] = (255*jet_clamp(2.0 - (1.0 / (p1 - t_min)) * abs(t - p2))).astype(np.uint8)
+    rgba[:, :, 2] = (255*jet_clamp((1.0 / (p1 - p2)) * (t - p2))).astype(np.uint8)
+
     rgba[:, :, 3] = np.full((t.shape[0], t.shape[1]), 255, dtype=np.uint8)
+
     return rgba
 
 
@@ -170,21 +174,19 @@ def init_lib():
     tiled_img = ffi.new('unsigned char**')
     t_nr = ffi.new('unsigned int *')
     t_nc = ffi.new('unsigned int *')
-    det_img = ffi.new('unsigned char**')
+    #det_img = ffi.new('unsigned char**')
     num_dets = ffi.new('unsigned int *')
     dets = ffi.new('struct detection_struct**')
-    dc = ffi.new('struct detection_center**')
+    #dc = ffi.new('struct detection_center**')
 
     # instantiate the get_layer_01 function
     # void get_layer_01(struct layer_struct *data, const float** data_params);
     ls_01 = ffi.new('struct layer_struct*')
     ld_01 = ffi.new('float**')
 
-    bp = 1
-
 
 def get_input():
-    global detection_windows, results_div, filename_div, image_path
+    global detection_windows, results_div, filename_div, image_path, rgba_img
 
     image_name = QFileDialog.getOpenFileName(None, "Select a file",  image_path, "Image files (*.png *.jpg *.gif);;All files (*.*)")
     filename_div.text = "File name: " + image_name[0]
@@ -202,6 +204,7 @@ def get_input():
     #p1.image_rgba(image=[np.flipud(rgba_img)], x=0, y=0, dw=400, dh=400)
 
     run_detection(color_img)
+    update_plots()
 
 
 def run_detection(color_img):
@@ -213,17 +216,13 @@ def run_detection(color_img):
     img_nc = color_img.shape[1]
 
     # run the image on network and get the results
-    obj_det_lib.run_net(gray_img.tobytes(), img_nr, img_nc, det_img, num_dets, dets)
+    obj_det_lib.get_detections(gray_img.tobytes(), img_nr, img_nc, num_dets, dets)
+    #obj_det_lib.run_net(gray_img.tobytes(), img_nr, img_nc, det_img, num_dets, dets)
     obj_det_lib.get_pyramid_tiled_input(gray_img.tobytes(), img_nr, img_nc, tiled_img, t_nr, t_nc)
-    obj_det_lib.get_detections(gray_img.tobytes(), img_nr, img_nc, num_dets, dc)
-
-    update_plots()
-
-    bp = 1
 
 
 def update_plots():
-    global ls_01, ld_01, detection_windows, t_nr, t_nc, tiled_img, det_img, num_dets, dets, \
+    global ls_01, ld_01, detection_windows, t_nr, t_nc, tiled_img, num_dets, dets, \
         results_div, rgba_img, img_nr, img_nc, p1, p2, ti, fs, dc
 
     detections = pd.DataFrame(columns=["x", "y", "h", "w", "label"])
@@ -239,12 +238,9 @@ def update_plots():
 
     print(dets_text[0:-1])
 
-    det_img_alpha = np.full((img_nr, img_nc), 255, dtype=np.uint8)
-    det_img_view = np.reshape(np.frombuffer(ffi.buffer(det_img[0], img_nr * img_nc * 3), dtype=np.uint8), [img_nr, img_nc, 3])
+    det_img_view = np.copy(rgba_img)
     for idx in range(num_dets[0]):
-        cv.circle(det_img_view, (dc[0][idx].x, dc[0][idx].y), 2, (255, 0, 0), -1)
-
-    det_img_view = np.dstack([det_img_view, det_img_alpha])
+        cv.rectangle(det_img_view, (dets[0][idx].x, dets[0][idx].y), (dets[0][idx].x+dets[0][idx].w, dets[0][idx].y+dets[0][idx].h), (255, 0, 0, 255), 2)
 
     tiled_img_alpha = np.full((t_nr[0], t_nc[0]), 255, dtype=np.uint8)
     tiled_img_view = np.dstack([np.reshape(np.frombuffer(ffi.buffer(tiled_img[0], t_nr[0] * t_nc[0] * 3), dtype=np.uint8), [t_nr[0], t_nc[0], 3]),
@@ -273,25 +269,23 @@ def update_plots():
 
     l01_list = []
     for idx in range(ls_01.k):
-        sd_key = "l01_img_" + "{:04d}".format(idx)
-        fl_data = "l01_imgf_" + "{:04d}".format(idx)
+        # sd_key = "l01_img_" + "{:04d}".format(idx)
+        # fl_data = "l01_imgf_" + "{:04d}".format(idx)
         s1 = idx*img_length
         s2 = (idx+1)*img_length
         l01_list.append(np.reshape(l01_data[s1:s2], [ls_01.nr, ls_01.nc]))
         # l01_jet = jet_color(l01_list[idx], l01_min, l01_max)
-        l01_jet = jet_color(l01_list[idx], -5.0, 0)
+        l01_jet = jet_color(l01_list[idx], -2.0, 0.0)
         fs[idx].image_rgba(image=[np.flipud(l01_jet)], x=0, y=0, dw=400, dh=400)
         # source.data[sd_key] = [np.flipud(l01_jet)]
         # source.data[fl_data] = [l01_list[idx]]
-        #fs[idx].tools[0].tooltips = {"Value": "$l01_list[idx]"}
+        # fs[idx].tools[0].tooltips = {"Value": "$l01_list[idx]"}
 
     bp = 1
 
 
 # the main entry point into the code
 # if __name__ == '__main__':
-# jet_1k = jet_colormap(1000)
-
 
 file_select_btn = Button(label='Select File', width=100)
 file_select_btn.on_click(get_input)
@@ -362,15 +356,9 @@ get_input()
 def selection_change(attrname, old, new):
     global p1_src
 
-    #t1, t2 = ticker1.value, ticker2.value
-    #data = get_data(t1, t2)
     selected = p1_src.selected.indices
     print("test1")
     print(selected)
-
-    #if selected:
-    #    data = data.iloc[selected, :]
-    #update_stats(data, t1, t2)
 
 
 #p1.on_change('indices', selection_change)
@@ -394,9 +382,7 @@ doc.add_root(layout)
 #    print("Closing ...")
 #    obj_det_lib.close_lib()
 
-
 #doc.on_session_destroyed(cleanup_session)
-
 
 # doc.hold('combine')
 
@@ -405,6 +391,6 @@ doc.add_root(layout)
 # get_input()
 #
 # bp = 1
-show(layout)
+
 
 
