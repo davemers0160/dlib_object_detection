@@ -68,23 +68,30 @@ int main(int argc, char** argv)
     std::string test_data_directory;
     std::vector<std::vector<std::string>> test_file;
 
+    // parameters for OpenCV image write png compression
+    std::vector<int> compression_params;
+    compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(2);
+
     unsigned int num_classes, num_win;
     unsigned int num_dets = 0;
     unsigned int t_nr = 0, t_nc = 0;
     unsigned int nr = 0, nc = 0;
 
     window_struct* det_win;
-    struct detection_center* detects;
-    //struct detection_struct* dets;
+    detection_struct* detects;
     
     unsigned char* tiled_img = NULL;
     unsigned char* det_img = NULL;
 
-    cv::Mat img, heatmap;
+    // image containers for the display of the detected image and the heatmaps
+    cv::Mat img, jet_hm, gray_hm;
 
+    // OpenCV image show window names
     std::string img_win_name = "Image";
-    std::string heat_win_name = "Heatmap Output";
-  
+    std::string jet_hm_name = "Jet Heatmap Output";
+    std::string gray_hm_name = "Gray Heatmap Output";
+
     // ----------------------------------------------------------------------------------------
     if (argc == 1)
     {
@@ -118,13 +125,12 @@ int main(int argc, char** argv)
 
     try {
 
-        //get_current_time(sdate, stime);
-
 //-----------------------------------------------------------------------------
 // Read in the testing images
 //-----------------------------------------------------------------------------
 
         std::cout << "------------------------------------------------------------------" << std::endl;
+
         // parse through the supplied test input file
         switch (test_input.second)
         {
@@ -168,8 +174,9 @@ int main(int argc, char** argv)
         }
 
         init_net lib_init_net = (init_net)GetProcAddress(obj_det_lib, "init_net");
-        run_net lib_run_net = (run_net)GetProcAddress(obj_det_lib, "run_net");
+        //run_net lib_run_net = (run_net)GetProcAddress(obj_det_lib, "run_net");
         get_detections lib_get_detections = (get_detections)GetProcAddress(obj_det_lib, "get_detections");
+        get_cropped_detections lib_get_cropped_detections = (get_cropped_detections)GetProcAddress(obj_det_lib, "get_cropped_detections");
         get_combined_output lib_get_combined_output = (get_combined_output)GetProcAddress(obj_det_lib, "get_combined_output");
         close_lib lib_close_lib = (close_lib)GetProcAddress(obj_det_lib, "close_lib");
 
@@ -182,8 +189,9 @@ int main(int argc, char** argv)
         }
 
         init_net lib_init_net = (init_net)dlsym(obj_det_lib, "init_net");
-        run_net lib_run_net = (run_net)dlsym(obj_det_lib, "run_net");
+        //run_net lib_run_net = (run_net)dlsym(obj_det_lib, "run_net");
         get_detections lib_get_detections = (get_detections)dlsym(obj_det_lib, "get_detections");
+        get_cropped_detections lib_get_detections = (get_cropped_detections)dlsym(obj_det_lib, "get_cropped_detections");
         get_combined_output lib_get_combined_output = (get_combined_output)dlsym(obj_det_lib, "get_combined_output");
         close_lib lib_close_lib = (close_lib)dlsym(obj_det_lib, "close_lib");
 
@@ -198,7 +206,8 @@ int main(int argc, char** argv)
 
         // create the windows to display the results and the heatmap
         cv::namedWindow(img_win_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
-        cv::namedWindow(heat_win_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+        cv::namedWindow(jet_hm_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+        cv::namedWindow(gray_hm_name, cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
 
         for (idx = 0; idx < test_file.size(); ++idx)
         {
@@ -220,14 +229,15 @@ int main(int argc, char** argv)
             layer_struct ls_hm;
             const float* ld_hm = NULL;
 
-            //get_layer_01(&ls_01, ld_01);
             lib_get_combined_output(&ls_hm, ld_hm);
 
-            heatmap = cv::Mat(ls_hm.nr, ls_hm.nc, CV_32FC1, (void*)ld_hm);
-            heatmap = cv_jet<float>(heatmap, -1.5, 0.0);
+            jet_hm = cv::Mat(ls_hm.nr, ls_hm.nc, CV_32FC1, (void*)ld_hm);
+            gray_hm = cv_gray<float>(jet_hm, -1.5, 0.0);
+            jet_hm = cv_jet<float>(jet_hm, -1.5, 0.0);
 
             cv::imshow(img_win_name, img);
-            cv::imshow(heat_win_name, heatmap);
+            cv::imshow(jet_hm_name, jet_hm);
+            cv::imshow(gray_hm_name, gray_hm);
 
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << test_file[idx][0] << std::endl;
@@ -236,10 +246,15 @@ int main(int argc, char** argv)
 
             for (jdx = 0; jdx < num_dets; ++jdx)
             {
-                std::cout << "Detection: " << std::string(detects[jdx].name) << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
+                std::cout << "Detection: " << std::string(detects[jdx].name) << ", (x, y, w, h): "
+                    << detects[jdx].x << "," << detects[jdx].y << "," << detects[jdx].w << "," << detects[jdx].h << std::endl;
             }
 
-            cv::waitKey(5);
+            //save results to an image
+            cv::imwrite(save_directory + "jet_hm_" + num2str(idx, "_%05d.png"), jet_hm, compression_params);
+            cv::imwrite(save_directory + "gray_hm_" + num2str(idx, "_%05d.png"), gray_hm, compression_params);
+
+            cv::waitKey(1);
 
             int bp = 1;
         }
@@ -254,8 +269,6 @@ int main(int argc, char** argv)
         dlclose(obj_det_lib);
 #endif
 
-        std::cout << std::endl << "End of Program." << std::endl;
-        std::cin.ignore();
         
     }
     catch (std::exception& e)
@@ -265,6 +278,9 @@ int main(int argc, char** argv)
         std::cout << std::endl << "Press Enter to close..." << std::endl;
         std::cin.ignore();
     }
+
+    std::cout << std::endl << "End of Program.  Press Enter to close..." << std::endl;
+    std::cin.ignore();
 
     cv::destroyAllWindows();
 

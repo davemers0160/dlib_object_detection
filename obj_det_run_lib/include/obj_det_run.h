@@ -9,6 +9,7 @@
 // ----------------------------------------------------------------------------------------
 // The common function definitions that are in the dynamic library 
 // ----------------------------------------------------------------------------------------
+const int label_size = 256;
 
 struct layer_struct
 {
@@ -24,27 +25,33 @@ struct window_struct
 {
     unsigned int w;
     unsigned int h;
-    char label[256];
+    char label[label_size];
 };
 
 // ----------------------------------------------------------------------------------------
-struct detection_center
+struct detection_struct
 {
     unsigned int x;
     unsigned int y;
-    char name[256];
+    unsigned int w;
+    unsigned int h;
+    char name[label_size];
 
-    detection_center()
+    detection_struct()
     {
         x = 0;
         y = 0;
+        w = 0;
+        h = 0;
         name[0] = 0;
     }
 
-    detection_center(unsigned int x_, unsigned int y_, const char name_[])
+    detection_struct(unsigned int x_, unsigned int y_, unsigned int w_, unsigned int h_, const char name_[])
     {
         x = x_;
         y = y_;
+        w = w_;
+        h = h_;
         strcpy(name, name_);
     }
 
@@ -52,8 +59,9 @@ struct detection_center
 
 // ----------------------------------------------------------------------------------------
 typedef void (*init_net)(const char* net_name, unsigned int* num_classes, struct window_struct*& det_win, unsigned int* num_win);
-typedef void (*run_net)(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char*& det_img, unsigned int* num_dets, struct detection_struct*& dets);
-typedef void (*get_detections)(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_center*& dets);
+//typedef void (*run_net)(unsigned char* image, unsigned int nr, unsigned int nc, unsigned char*& det_img, unsigned int* num_dets, struct detection_struct*& dets);
+typedef void (*get_detections)(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int* num_dets, struct detection_struct*& dets);
+typedef void (*get_cropped_detections)(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* num_dets, struct detection_struct*& dets);
 typedef void (*get_combined_output)(struct layer_struct* data, const float*& data_params);
 typedef void (*close_lib)();
 
