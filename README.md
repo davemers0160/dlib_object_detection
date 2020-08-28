@@ -17,7 +17,7 @@ The code in this repository has the following dependecies
 
 These sub-projects are dedicated to training dnn's for object detection and classification.
 
-### obj_det_trainer
+#### obj_det_trainer
 
 This folder contains the project code that runs the training of a given network against a given dataset using the array style input for each color channel.
 
@@ -36,14 +36,14 @@ This folder contains the project code that runs the performance analysis of a gi
 
 This folder contains the project code that runs the performance analysis of a given network against a given dataset using the rgb pixel color input.
 
-### Dynamic Library generation
+### Dynamic Library Generation:
 These sub-projects are designed to compile a trained network into a shared library that can be used by other programs.
 
 ### obj_det_lib
 
 This folder contains the project code that compiles a dnn object detector into a shared library that can be used by other programs.  The network input uses the array style input for each color channel.
 
-### Dynamic Library Linking Examples
+### Dynamic Library Linking Examples:
 These sub-projects provide examples on how to link the compiled shared library to other C++ code.
 
 ### obj_det_run
@@ -54,7 +54,7 @@ This folder contains the project code that tests the linking in C++ to the share
 
 This folder contains the project code that allows you supply the compiled shared object detector library at runtime.
 
-### Network Result Viewer
+### Network Result Viewer:
 
 ### obj_det_viewer
 
