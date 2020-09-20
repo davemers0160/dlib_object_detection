@@ -5,7 +5,7 @@
 #include "dlib/dnn.h"
 #include "dlib/dnn/core.h"
 
-const uint32_t pyramid_size = 4;
+const uint32_t pyramid_size = 5;
 
 // --------------------------------- Conv Filter Setup ------------------------------------
 template <long num_filters, typename SUBNET> using con1 = dlib::con<num_filters, 1, 1, 1, 1, SUBNET>;

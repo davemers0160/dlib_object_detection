@@ -232,8 +232,8 @@ pip-log.txt
 ###############################################################################
 ## DfD Project specific ignore files/folders
 ###############################################################################
-results/
-data/
+results*/
+data*/
 obj_det_analysis/nets/
 obj_det_rgb_analysis/nets/
 obj_det_lib/nets/
