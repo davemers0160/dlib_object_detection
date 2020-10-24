@@ -1,5 +1,5 @@
 # Object Detector Analysis Project
-This project designed to provide analysis for object detectors build on the dlib framework.
+This project is designed to provide analysis for object detectors build on the dlib framework.
 
 ## Dependencies
 

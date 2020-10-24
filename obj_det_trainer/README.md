@@ -1,5 +1,5 @@
 # Object Detector Trainer Project
-This project designed to train an object detectors build on the dlib framework.
+This project is designed to train an object detectors build on the dlib framework.
 
 ## Dependencies
 
