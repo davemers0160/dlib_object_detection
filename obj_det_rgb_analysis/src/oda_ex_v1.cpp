@@ -24,7 +24,7 @@
 #include "file_ops.h"
 #include "get_current_time.h"
 #include "num2string.h"
-#include "overlay_bounding_box.h"
+#include "dlib_overlay_bbox.h"
 
 // Net Version
 #include "obj_det_net_rgb_v10.h"

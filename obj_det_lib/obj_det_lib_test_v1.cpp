@@ -18,7 +18,7 @@
 #include <opencv2/imgproc.hpp>
  
 // Custom includes
-//#include "overlay_bounding_box.h"
+//#include "dlib_overlay_bbox.h"
 #include "obj_det_lib.h"
 //#include "obj_det_net_v4.h"
 
@@ -195,7 +195,7 @@ int main(int argc, char** argv)
 //    for (idx = 0; idx < d.size(); ++idx)
 //    {
 //        auto& class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-//        overlay_bounding_box(tmp_img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
+//        dlib_overlay_bbox(tmp_img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
 //        dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), d[idx].label.c_str());
 //
 //    }

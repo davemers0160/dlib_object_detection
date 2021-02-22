@@ -45,7 +45,7 @@
 #include <dlib/rand.h>
 
 #if !defined(DLIB_NO_GUI_SUPPORT)
-#include "overlay_bounding_box.h"
+#include "dlib_overlay_bbox.h"
 #include <dlib/gui_widgets.h>
 #endif
 
@@ -534,7 +534,7 @@ int main(int argc, char** argv)
             for (jdx = 0; jdx < train_labels[idx].size(); ++jdx)
             {
                 auto& class_index = std::find(class_names.begin(), class_names.end(), train_labels[idx][jdx].label);
-                overlay_bounding_box(rgb_img, train_labels[idx][jdx], class_color[std::distance(class_names.begin(), class_index)]);
+                dlib_overlay_bbox(rgb_img, train_labels[idx][jdx], class_color[std::distance(class_names.begin(), class_index)]);
             }
             win.set_image(rgb_img);
             //dlib::sleep(800);

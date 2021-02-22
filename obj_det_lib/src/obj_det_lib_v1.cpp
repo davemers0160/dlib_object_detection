@@ -10,7 +10,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "overlay_bounding_box.h"
+#include "dlib_overlay_bbox.h"
 #endif
 //#endif
 
@@ -190,7 +190,7 @@ void run_net(unsigned char* input_img, unsigned int nr, unsigned int nc, unsigne
         for (idx = 0; idx < d.size(); ++idx)
         {
             auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-            overlay_bounding_box(tmp_img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
+            dlib_overlay_bbox(tmp_img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
             label = d[idx].label.substr(0, std::min((size_t)255, d[idx].label.length()));
             dets[idx] = detection_struct(d[idx].rect.left(), d[idx].rect.top(), d[idx].rect.width(), d[idx].rect.height(), label.c_str());
         }
