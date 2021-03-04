@@ -183,7 +183,7 @@ int main(int argc, char** argv)
             // get the rough classification time per image
             start_time = chrono::system_clock::now();
             //run_net(img.ptr<unsigned char>(0), nr, nc, det_img, &num_dets, dets);
-            get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, detects);
+            get_detections(img.ptr<unsigned char>(0), nr, nc, &num_dets, dets);
             stop_time = chrono::system_clock::now();
             
             elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
