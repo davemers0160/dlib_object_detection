@@ -16,7 +16,7 @@
 // dlib Includes
 #include <dlib/dnn.h>
 #if !defined(DLIB_NO_GUI_SUPPORT)
-#include "overlay_bounding_box.h"
+#include "dlib_overlay_bbox.h"
 #include <dlib/gui_widgets.h>
 #endif
 
@@ -110,7 +110,7 @@ dlib::matrix<double, 1, 6> run_net_performace(std::ofstream &data_log_stream,
         for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
         {
             vector<string>::iterator class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
-            overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
+            dlib_overlay_bbox(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)]);
 
             data_log_stream << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
             std::cout << "Detect Confidence Level (" << dnn_labels[jdx].label << "): " << dnn_labels[jdx].detection_confidence << std::endl;
