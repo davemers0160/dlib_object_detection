@@ -57,7 +57,7 @@ cmake ..
 cmake --build . --config Release -- -j4
 ```
 
-Or you can use the cmake-gui and set the "source code" location to the location of the CmakeLists.txt file and the set the "build" location to the build folder. Then open a terminal window and navigate to the build folder and execute the follokwing command:
+Or you can use the cmake-gui and set the "source code" location to the location of the CmakeLists.txt file and the set the "build" location to the build folder. Then open a terminal window and navigate to the build folder and execute the following command:
 
 ```
 cmake --build . --config Release -- -j4
