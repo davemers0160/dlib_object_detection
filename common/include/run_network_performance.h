@@ -16,7 +16,10 @@
 
 // dlib Includes
 #include <dlib/dnn.h>
-
+#if !defined(DLIB_NO_GUI_SUPPORT)
+#include "dlib_overlay_bbox.h"
+#include <dlib/gui_widgets.h>
+#endif
 extern const uint32_t array_depth;
 
 //-----------------------------------------------------------------------------
