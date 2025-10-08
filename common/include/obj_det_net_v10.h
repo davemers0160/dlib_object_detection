@@ -154,10 +154,11 @@ net_type config_net(dlib::mmod_options options, std::array<float, array_depth> a
         dlib::num_con_outputs(params[12]),
         dlib::num_con_outputs(params[13]),
         dlib::num_con_outputs(params[14])
+        //dlib::input_array_image_pyramid<dlib::pyramid_down<4>, array_depth>(avg_color[0])
     );
 
     net.subnet().layer_details().set_num_filters(options.detector_windows.size());
-    dlib::layer<net_type::num_layers - 1>(net).set_avg_color(avg_color);
+    //dlib::layer<net_type::num_layers - 1>(net).set_avg_color(avg_color);
 
     return net;
 
